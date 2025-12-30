@@ -1,3 +1,5 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -20,6 +22,14 @@ const nextConfig = {
   // Disable automatic scroll restoration to allow custom scroll behavior
   experimental: {
     scrollRestoration: false,
+  },
+  // Webpack configuration for path aliases
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    }
+    return config
   },
 }
 
