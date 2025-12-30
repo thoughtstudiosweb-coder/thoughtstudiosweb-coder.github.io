@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { normalizeToHttps } from '@/lib/url-utils'
 
 interface BlogPost {
   slug: string
@@ -74,7 +75,7 @@ export default function StudioNotes({ posts }: StudioNotesProps) {
             >
               <div className="studio-note-image-container">
                 <img
-                  src={post.cover || PLACEHOLDER_IMAGE}
+                  src={normalizeToHttps(post.cover) || PLACEHOLDER_IMAGE}
                   alt={post.title}
                   className="studio-note-image"
                   onError={(e) => {

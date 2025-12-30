@@ -31,6 +31,19 @@ export async function middleware(request: NextRequest) {
   // Add pathname to headers for layout to use
   const response = NextResponse.next()
   response.headers.set('x-pathname', pathname)
+  
+  // Add security headers to prevent "Not Secure" warnings
+  // These headers help browsers trust the site
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
+  // Only set HSTS if we're on HTTPS (Vercel always uses HTTPS)
+  if (request.url.startsWith('https://')) {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  }
+  
   return response
 }
 

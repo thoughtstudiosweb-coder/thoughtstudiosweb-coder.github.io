@@ -20,9 +20,12 @@ export async function POST(request: NextRequest) {
       const session = await encrypt({ email, loggedIn: true })
       
       const response = NextResponse.json({ success: true })
+      // Always use Secure flag on Vercel (HTTPS) or when VERCEL env var is set
+      // This prevents "Not Secure" warnings in browsers
+      const isSecure = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production' || request.url.startsWith('https://')
       response.cookies.set('session', session, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isSecure,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',

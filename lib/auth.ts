@@ -30,9 +30,12 @@ export async function login(email: string, password: string) {
   if (email === adminEmail && password === adminPassword) {
     const session = await encrypt({ email, loggedIn: true })
     const cookieStore = await cookies()
+    // Always use Secure flag on Vercel (HTTPS) to prevent "Not Secure" warnings
+    // VERCEL env var is set to '1' on Vercel deployments
+    const isSecure = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
     cookieStore.set('session', session, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/',

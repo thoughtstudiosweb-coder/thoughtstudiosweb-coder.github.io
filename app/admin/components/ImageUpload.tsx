@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { normalizeToHttps } from '@/lib/url-utils'
 
 interface ImageUploadProps {
   value: string
@@ -69,9 +70,11 @@ export default function ImageUpload({ value, onChange, label = 'Image', required
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
-    onChange(url)
-    if (url) {
-      setPreview(url)
+    // Normalize URL to HTTPS to prevent mixed content issues
+    const normalizedUrl = normalizeToHttps(url)
+    onChange(normalizedUrl)
+    if (normalizedUrl) {
+      setPreview(normalizedUrl)
     } else {
       setPreview(null)
     }
@@ -83,8 +86,10 @@ export default function ImageUpload({ value, onChange, label = 'Image', required
     // Check if pasted text is an image URL
     if (pastedText.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) || pastedText.startsWith('http')) {
       e.preventDefault()
-      onChange(pastedText)
-      setPreview(pastedText)
+      // Normalize URL to HTTPS to prevent mixed content issues
+      const normalizedUrl = normalizeToHttps(pastedText)
+      onChange(normalizedUrl)
+      setPreview(normalizedUrl)
     }
   }
 

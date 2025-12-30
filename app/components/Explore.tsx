@@ -1,3 +1,4 @@
+import { normalizeToHttps } from '@/lib/url-utils'
 
 interface Explore {
   title: string
@@ -25,7 +26,7 @@ export default function Explore({ data }: ExploreProps) {
               <div className="card-icon">
                 {item.icon ? (
                   <img
-                    src={item.icon}
+                    src={normalizeToHttps(item.icon)}
                     alt={item.title}
                     className="card-icon-image"
                   />
