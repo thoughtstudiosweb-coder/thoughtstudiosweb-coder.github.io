@@ -8,14 +8,15 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // Add a small delay to ensure fresh data from Postgres
-  await new Promise(resolve => setTimeout(resolve, 100))
+  // Add a delay to ensure fresh data from Postgres (same as getPageData)
+  await new Promise(resolve => setTimeout(resolve, 500))
   
   // Try Postgres first (more efficient)
   if (isPostgresAvailable()) {
     try {
+      console.log('🔍 API /blog: Fetching blog posts from Postgres...')
       const posts = await getBlogPosts()
-      console.log(`📤 API: Returning ${posts.length} blog posts from Postgres`)
+      console.log(`📤 API /blog: Retrieved ${posts.length} blog posts from getBlogPosts()`)
       // Format posts for API response with excerpt
       const formattedPosts = posts.map(post => {
         // Ensure date is a string in YYYY-MM-DD format

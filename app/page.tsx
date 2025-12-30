@@ -14,7 +14,9 @@ export const revalidate = 0
 
 export default async function Home() {
   // Fetch all page data using centralized function
+  console.log('🏠 Home page: Fetching page data...')
   const { welcome, beliefs, explore, blogPosts } = await getPageData()
+  console.log(`🏠 Home page: Received ${blogPosts.length} blog posts`)
 
   return (
     <>

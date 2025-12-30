@@ -69,7 +69,9 @@ export async function getPageData(): Promise<PageData> {
 
   if (isPostgresAvailable()) {
     try {
+      console.log('🔍 getPageData: Fetching blog posts from Postgres...')
       const posts = await getBlogPosts()
+      console.log(`📥 getPageData: Retrieved ${posts.length} blog posts from getBlogPosts()`)
       blogPosts = posts.map(post => {
         // Ensure date is a string in YYYY-MM-DD format
         let dateStr = post.date
@@ -94,11 +96,17 @@ export async function getPageData(): Promise<PageData> {
       blogPosts.sort((a, b) => {
         return new Date(b.date).getTime() - new Date(a.date).getTime()
       })
+      
+      console.log(`✅ getPageData: Returning ${blogPosts.length} formatted blog posts`)
     } catch (error) {
-      console.error('Error fetching blog posts:', error)
+      console.error('❌ getPageData: Error fetching blog posts:', error)
       blogPosts = []
     }
+  } else {
+    console.warn('⚠️ getPageData: Postgres not available, no blog posts will be shown')
   }
+
+  console.log(`📊 getPageData: Final data - Welcome: ${welcome ? 'yes' : 'no'}, Beliefs: ${beliefs.length}, Explore: ${explore.length}, BlogPosts: ${blogPosts.length}`)
 
   return {
     welcome: welcome || null,

@@ -146,7 +146,8 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     console.log('🔍 Querying blog_posts table...')
     // Add a delay to handle connection pooling (Neon DB)
-    await new Promise(resolve => setTimeout(resolve, 300))
+    // Increased to 500ms to ensure all data is visible
+    await new Promise(resolve => setTimeout(resolve, 500))
     
     const result = await sql`
       SELECT slug, title, date, tags, cover, content, created_at
@@ -157,6 +158,9 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     console.log(`✅ Found ${result.rows.length} blog posts in database`)
     if (result.rows.length > 0) {
       console.log(`   Latest post: "${result.rows[0].title}" (created: ${result.rows[0].created_at})`)
+      console.log(`   All slugs: ${result.rows.map((r: any) => r.slug).join(', ')}`)
+    } else {
+      console.log(`   ⚠️ No blog posts found in database`)
     }
     
     const posts = result.rows.map(row => {
@@ -182,7 +186,10 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
       }
     })
     
-    console.log(`📋 Returning ${posts.length} formatted blog posts`)
+    console.log(`📋 Returning ${posts.length} formatted blog posts from getBlogPosts()`)
+    if (posts.length > 0) {
+      console.log(`   Post slugs: ${posts.map(p => p.slug).join(', ')}`)
+    }
     return posts
   } catch (error: any) {
     console.error('❌ Error reading blog posts:', error)
