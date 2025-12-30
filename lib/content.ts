@@ -29,18 +29,26 @@ export async function readJSON<T>(fileName: string): Promise<T | null> {
     const key = fileName.replace('.json', '') // Remove .json extension for key
     const content = await getContent(key)
     if (content !== null) {
+      console.log(`✅ Read ${fileName} from Postgres (key: ${key})`)
       return content as T
+    } else {
+      console.log(`⚠️ ${fileName} not found in Postgres (key: ${key}), checking filesystem...`)
     }
   }
 
-  // Fallback to filesystem
+  // Fallback to filesystem (only if Postgres is not available or returned null)
   try {
     const filePath = getContentFile(fileName)
-    if (!fs.existsSync(filePath)) return null
+    if (!fs.existsSync(filePath)) {
+      console.log(`⚠️ ${fileName} not found in filesystem either`)
+      return null
+    }
     const fileContents = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(fileContents) as T
+    const parsed = JSON.parse(fileContents) as T
+    console.log(`📁 Read ${fileName} from filesystem (Postgres unavailable or returned null)`)
+    return parsed
   } catch (error) {
-    console.error(`Error reading ${fileName}:`, error)
+    console.error(`❌ Error reading ${fileName}:`, error)
     return null
   }
 }
@@ -79,12 +87,8 @@ export async function readMarkdownFiles() {
       const posts = await getBlogPosts()
       console.log(`📝 Retrieved ${posts.length} blog posts from Postgres`)
       
-      if (posts.length === 0) {
-        console.warn('⚠️ No blog posts found in Postgres database')
-        return []
-      }
-      
-      return posts.map(post => {
+      if (posts.length > 0) {
+        return posts.map(post => {
         // Convert blog post back to markdown format with frontmatter
         const markdown = matter.stringify(post.content, {
           title: post.title,

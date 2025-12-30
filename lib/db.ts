@@ -63,6 +63,7 @@ export async function initDatabase() {
 // Content operations (JSON)
 export async function getContent(key: string): Promise<any | null> {
   if (!isPostgresAvailable()) {
+    console.log(`⚠️ Postgres not available, cannot read content for key: ${key}`)
     return null
   }
 
@@ -70,9 +71,16 @@ export async function getContent(key: string): Promise<any | null> {
     const result = await sql`
       SELECT value FROM content WHERE key = ${key}
     `
-    return result.rows[0]?.value || null
-  } catch (error) {
-    console.error(`Error reading content ${key}:`, error)
+    if (result.rows.length > 0) {
+      console.log(`✅ Found content for key: ${key}`)
+      return result.rows[0].value
+    } else {
+      console.log(`⚠️ No content found for key: ${key}`)
+      return null
+    }
+  } catch (error: any) {
+    console.error(`❌ Error reading content ${key}:`, error)
+    console.error('Error details:', error.message, error.code)
     return null
   }
 }
