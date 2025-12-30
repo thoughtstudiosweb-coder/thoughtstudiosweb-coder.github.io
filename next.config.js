@@ -25,6 +25,7 @@ const nextConfig = {
   },
   // Webpack configuration for path aliases
   webpack: (config) => {
+    // Resolve @ alias to project root
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
