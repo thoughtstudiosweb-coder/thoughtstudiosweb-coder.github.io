@@ -19,12 +19,19 @@ export default function ExploreEditor() {
 
   const fetchExplore = async () => {
     try {
-      const res = await fetch('/api/content/explore')
+      // Add cache-busting timestamp and no-cache option
+      const res = await fetch(`/api/content/explore?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
       if (!res.ok) {
         console.error('Failed to load explore content:', res.status, res.statusText)
         return []
       }
       const data = await res.json()
+      console.log('📥 Fetched explore from API:', data.length, 'items')
       setExplore(data || [])
       setLoading(false)
       return data
@@ -55,12 +62,16 @@ export default function ExploreEditor() {
       
       if (res.ok) {
         setSaveSuccess(true)
-        setMessage('Saved successfully!')
+        setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
         setTimeout(async () => {
+          console.log('🔄 Refetching explore after save...')
           await fetchExplore()
-          setMessage('')
-          setSaveSuccess(false)
+          setMessage('Saved successfully!')
+          setTimeout(() => {
+            setMessage('')
+            setSaveSuccess(false)
+          }, 2000)
         }, 1500)
       } else {
         const errorMsg = data.error || 'Error saving'

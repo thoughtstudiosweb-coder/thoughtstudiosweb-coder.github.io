@@ -19,8 +19,15 @@ export default function WelcomeEditor() {
 
   const fetchWelcome = async () => {
     try {
-      const res = await fetch('/api/content/welcome')
+      // Add cache-busting timestamp and no-cache option
+      const res = await fetch(`/api/content/welcome?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
       const data = await res.json()
+      console.log('📥 Fetched welcome from API:', data)
       setData(data || {})
       setLoading(false)
       return data
@@ -49,12 +56,16 @@ export default function WelcomeEditor() {
 
       if (res.ok) {
         setSaveSuccess(true)
-        setMessage('Saved successfully!')
+        setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
         setTimeout(async () => {
+          console.log('🔄 Refetching welcome after save...')
           await fetchWelcome()
-          setMessage('')
-          setSaveSuccess(false)
+          setMessage('Saved successfully!')
+          setTimeout(() => {
+            setMessage('')
+            setSaveSuccess(false)
+          }, 2000)
         }, 1500)
       } else {
         setMessage('Error saving')

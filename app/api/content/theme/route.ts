@@ -8,7 +8,14 @@ export const runtime = 'nodejs'
 
 export async function GET() {
   const theme = await readJSON('theme.json')
-  return NextResponse.json(theme)
+  // Add no-cache headers to prevent browser caching
+  return NextResponse.json(theme, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  })
 }
 
 export async function PUT(request: NextRequest) {

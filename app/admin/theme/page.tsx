@@ -65,8 +65,15 @@ export default function ThemeEditor() {
 
   const fetchTheme = async () => {
     try {
-      const res = await fetch('/api/content/theme')
+      // Add cache-busting timestamp and no-cache option
+      const res = await fetch(`/api/content/theme?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
       const data = await res.json()
+      console.log('📥 Fetched theme from API:', data)
       setTheme(data)
       setLoading(false)
       return data
@@ -97,12 +104,16 @@ export default function ThemeEditor() {
 
       if (res.ok) {
         setSaveSuccess(true)
-        setMessage('Saved successfully!')
+        setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
         setTimeout(async () => {
+          console.log('🔄 Refetching theme after save...')
           await fetchTheme()
-          setMessage('')
-          setSaveSuccess(false)
+          setMessage('Saved successfully!')
+          setTimeout(() => {
+            setMessage('')
+            setSaveSuccess(false)
+          }, 2000)
         }, 1500)
       } else {
         setMessage('Error saving')

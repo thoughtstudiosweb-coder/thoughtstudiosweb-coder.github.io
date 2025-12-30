@@ -9,7 +9,14 @@ export const runtime = 'nodejs'
 export async function GET() {
   try {
     const explore = await readJSON('explore.json')
-    return NextResponse.json(explore || [])
+    // Add no-cache headers to prevent browser caching
+    return NextResponse.json(explore || [], {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error: any) {
     console.error('Error reading explore content:', error)
     return NextResponse.json(

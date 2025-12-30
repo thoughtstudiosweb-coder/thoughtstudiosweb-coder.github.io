@@ -9,7 +9,14 @@ export const runtime = 'nodejs'
 export async function GET() {
   try {
     const beliefs = await readJSON('beliefs.json')
-    return NextResponse.json(beliefs || [])
+    // Add no-cache headers to prevent browser caching
+    return NextResponse.json(beliefs || [], {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error: any) {
     console.error('Error reading beliefs content:', error)
     return NextResponse.json(
