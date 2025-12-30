@@ -179,33 +179,23 @@ export async function createBlogPost(post: BlogPost): Promise<{ success: boolean
     // Ensure tags is always an array
     const tagsArray = Array.isArray(post.tags) ? post.tags : []
     
-    // For empty arrays, PostgreSQL needs '{}' format
-    // For non-empty, we can pass the array directly and @vercel/postgres will handle it
-    if (tagsArray.length === 0) {
-      await sql`
-        INSERT INTO blog_posts (slug, title, date, tags, cover, content)
-        VALUES (
-          ${post.slug},
-          ${post.title},
-          ${post.date},
-          ARRAY[]::text[],
-          ${post.cover || ''},
-          ${post.content}
-        )
-      `
-    } else {
-      await sql`
-        INSERT INTO blog_posts (slug, title, date, tags, cover, content)
-        VALUES (
-          ${post.slug},
-          ${post.title},
-          ${post.date},
-          ${tagsArray}::text[],
-          ${post.cover || ''},
-          ${post.content}
-        )
-      `
-    }
+    // Format as PostgreSQL array literal: '{}' for empty, '{tag1,tag2}' for non-empty
+    // Escape single quotes in tag values
+    const tagsString = tagsArray.length === 0 
+      ? '{}'
+      : `{${tagsArray.map(tag => `"${String(tag).replace(/"/g, '\\"')}"`).join(',')}}`
+    
+    await sql`
+      INSERT INTO blog_posts (slug, title, date, tags, cover, content)
+      VALUES (
+        ${post.slug},
+        ${post.title},
+        ${post.date},
+        ${tagsString}::text[],
+        ${post.cover || ''},
+        ${post.content}
+      )
+    `
     console.log(`✅ Blog post "${post.slug}" created successfully`)
     return { success: true }
   } catch (error: any) {
@@ -232,33 +222,23 @@ export async function updateBlogPost(slug: string, post: BlogPost): Promise<bool
     // Format tags array for PostgreSQL
     const tagsArray = Array.isArray(post.tags) ? post.tags : []
     
-    // For empty arrays, PostgreSQL needs ARRAY[]::text[]
-    // For non-empty, we can pass the array directly
-    if (tagsArray.length === 0) {
-      await sql`
-        UPDATE blog_posts
-        SET 
-          title = ${post.title},
-          date = ${post.date},
-          tags = ARRAY[]::text[],
-          cover = ${post.cover || ''},
-          content = ${post.content},
-          updated_at = CURRENT_TIMESTAMP
-        WHERE slug = ${slug}
-      `
-    } else {
-      await sql`
-        UPDATE blog_posts
-        SET 
-          title = ${post.title},
-          date = ${post.date},
-          tags = ${tagsArray}::text[],
-          cover = ${post.cover || ''},
-          content = ${post.content},
-          updated_at = CURRENT_TIMESTAMP
-        WHERE slug = ${slug}
-      `
-    }
+    // Format as PostgreSQL array literal: '{}' for empty, '{tag1,tag2}' for non-empty
+    // Escape double quotes in tag values
+    const tagsString = tagsArray.length === 0 
+      ? '{}'
+      : `{${tagsArray.map(tag => `"${String(tag).replace(/"/g, '\\"')}"`).join(',')}}`
+    
+    await sql`
+      UPDATE blog_posts
+      SET 
+        title = ${post.title},
+        date = ${post.date},
+        tags = ${tagsString}::text[],
+        cover = ${post.cover || ''},
+        content = ${post.content},
+        updated_at = CURRENT_TIMESTAMP
+      WHERE slug = ${slug}
+    `
     return true
   } catch (error) {
     console.error(`Error updating blog post ${slug}:`, error)
