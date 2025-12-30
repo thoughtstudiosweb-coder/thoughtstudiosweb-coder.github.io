@@ -89,15 +89,18 @@ export async function readMarkdownFiles() {
       
       if (posts.length > 0) {
         return posts.map(post => {
-        // Convert blog post back to markdown format with frontmatter
-        const markdown = matter.stringify(post.content, {
-          title: post.title,
-          date: post.date,
-          tags: post.tags,
-          cover: post.cover,
+          // Convert blog post back to markdown format with frontmatter
+          const markdown = matter.stringify(post.content, {
+            title: post.title,
+            date: post.date,
+            tags: post.tags,
+            cover: post.cover,
+          })
+          return { slug: post.slug, content: markdown, filePath: '' }
         })
-        return { slug: post.slug, content: markdown, filePath: '' }
-      })
+      } else {
+        console.warn('⚠️ No blog posts found in Postgres database, checking filesystem...')
+      }
     } catch (error) {
       console.error('❌ Error reading blog posts from Postgres:', error)
       // Fall through to filesystem fallback
