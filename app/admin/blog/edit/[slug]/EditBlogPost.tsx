@@ -2,38 +2,28 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createPost } from '../actions'
+import { updatePost } from '../actions'
 
-export default function NewBlogPost() {
+interface EditBlogPostProps {
+  slug: string
+  initialData: {
+    title: string
+    date: string
+    tags: string[]
+    cover: string
+    content: string
+  }
+}
+
+export default function EditBlogPost({ slug, initialData }: EditBlogPostProps) {
   const router = useRouter()
-  const [slug, setSlug] = useState('')
-  const [title, setTitle] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [tags, setTags] = useState('')
-  const [cover, setCover] = useState('')
-  const [content, setContent] = useState('')
+  const [title, setTitle] = useState(initialData.title || '')
+  const [date, setDate] = useState(initialData.date || '')
+  const [tags, setTags] = useState(initialData.tags?.join(', ') || '')
+  const [cover, setCover] = useState(initialData.cover || '')
+  const [content, setContent] = useState(initialData.content || '')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
-
-  const generateSlug = (text: string) => {
-    if (!text) return ''
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-  }
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value
-    setTitle(newTitle)
-    // Only auto-generate slug if it's empty or matches the old title's slug
-    if (!slug || slug === generateSlug(title)) {
-      // Generate slug with timestamp to ensure uniqueness
-      const baseSlug = generateSlug(newTitle)
-      const timestamp = Date.now()
-      setSlug(baseSlug ? `${baseSlug}-${timestamp}` : `post-${timestamp}`)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,8 +31,7 @@ export default function NewBlogPost() {
     setMessage('')
 
     try {
-      await createPost({
-        slug,
+      await updatePost(slug, {
         title,
         date,
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
@@ -50,11 +39,11 @@ export default function NewBlogPost() {
         content,
       })
       
-      setMessage('Post created successfully! Redirecting...')
+      setMessage('Post updated successfully! Redirecting...')
       router.push('/admin/blog')
       router.refresh()
     } catch (error: any) {
-      setMessage(error.message || 'Error creating post')
+      setMessage(error.message || 'Error updating post')
     } finally {
       setSaving(false)
     }
@@ -62,7 +51,7 @@ export default function NewBlogPost() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-8">New Blog Post</h1>
+      <h1 className="text-3xl font-bold text-white mb-8">Edit Blog Post</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-6 rounded-lg">
         {message && (
@@ -78,27 +67,10 @@ export default function NewBlogPost() {
           <input
             type="text"
             value={title}
-            onChange={handleTitleChange}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
             required
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Slug (URL-friendly)
-          </label>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
-            required
-            placeholder="Auto-generated from title"
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Unique identifier for the post URL. Auto-generated with timestamp to ensure uniqueness.
-          </p>
         </div>
 
         <div>
@@ -157,7 +129,7 @@ export default function NewBlogPost() {
             disabled={saving}
             className="px-6 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark disabled:opacity-50"
           >
-            {saving ? 'Creating...' : 'Create Post'}
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             type="button"
@@ -171,3 +143,4 @@ export default function NewBlogPost() {
     </div>
   )
 }
+

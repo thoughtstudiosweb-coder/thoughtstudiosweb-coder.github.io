@@ -1,190 +1,24 @@
-'use client'
+import { getPost } from '../actions'
+import EditBlogPost from './EditBlogPost'
+import { notFound } from 'next/navigation'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-export default function EditBlogPost() {
-  const router = useRouter()
-  const params = useParams()
-  const slug = params.slug as string
-
-  const [title, setTitle] = useState('')
-  const [date, setDate] = useState('')
-  const [tags, setTags] = useState('')
-  const [cover, setCover] = useState('')
-  const [content, setContent] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        // Add cache-busting timestamp and no-cache option
-        const res = await fetch(`/api/blog/${slug}?t=${Date.now()}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache',
-          },
-        })
-        
-        if (!res.ok) {
-          console.error('Failed to fetch post:', res.status, res.statusText)
-          setMessage(`Failed to load post: ${res.statusText}`)
-          setLoading(false)
-          return
-        }
-        
-        const data = await res.json()
-        setTitle(data.title || '')
-        setDate(data.date || '')
-        setTags(data.tags?.join(', ') || '')
-        setCover(data.cover || '')
-        setContent(data.content || '')
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching post:', error)
-        setMessage('Error loading post')
-        setLoading(false)
-      }
-    }
-    
-    fetchPost()
-  }, [slug])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setMessage('')
-
-    try {
-      const res = await fetch(`/api/blog/update/${slug}?t=${Date.now()}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        cache: 'no-store',
-        body: JSON.stringify({
-          title,
-          date,
-          tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-          cover,
-          content,
-        }),
-      })
-
-      if (res.ok) {
-        setMessage('Post updated successfully! Redirecting...')
-        // Wait for connection pooling delay before redirecting
-        setTimeout(() => {
-          router.push('/admin/blog')
-        }, 2000)
-      } else {
-        const error = await res.json().catch(() => ({}))
-        setMessage(error.error || 'Error updating post')
-      }
-    } catch (error) {
-      setMessage('Error updating post')
-    } finally {
-      setSaving(false)
-    }
+export default async function EditBlogPostPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  console.log(`🔍 Edit blog post page: Fetching post "${params.slug}" from Postgres...`)
+  const post = await getPost(params.slug)
+  
+  if (!post) {
+    console.log(`⚠️ Post "${params.slug}" not found`)
+    notFound()
   }
-
-  if (loading) {
-    return <div className="text-white">Loading...</div>
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-8">Edit Blog Post</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-6 rounded-lg">
-        {message && (
-          <div className="p-3 rounded bg-red-900 text-red-200">{message}</div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Title
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Date
-          </label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Tags (comma-separated)
-          </label>
-          <input
-            type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Cover Image URL
-          </label>
-          <input
-            type="text"
-            value={cover}
-            onChange={(e) => setCover(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Content (Markdown)
-          </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white font-mono"
-            rows={20}
-            required
-          />
-        </div>
-
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  )
+  
+  console.log(`✅ Edit blog post page: Retrieved post "${params.slug}"`)
+  return <EditBlogPost slug={params.slug} initialData={post} />
 }
-
