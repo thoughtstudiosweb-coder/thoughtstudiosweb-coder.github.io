@@ -3,6 +3,10 @@ import { getBlogPosts, isPostgresAvailable } from '@/lib/db'
 import { readMarkdownFiles } from '@/lib/content'
 import matter from 'gray-matter'
 
+// Ensure this route is dynamic
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET() {
   // Try Postgres first (more efficient)
   if (isPostgresAvailable()) {

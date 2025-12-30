@@ -6,9 +6,13 @@ import matter from 'gray-matter'
 import fs from 'fs'
 import path from 'path'
 
+// Ensure this route is dynamic
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
   const session = await getSession()
-  if (!session || !session.loggedIn) {
+  if (!session || !(session as any).loggedIn) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

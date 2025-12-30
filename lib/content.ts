@@ -75,17 +75,29 @@ export async function writeJSON<T>(fileName: string, data: T): Promise<boolean> 
 export async function readMarkdownFiles() {
   // Try Postgres first
   if (isPostgresAvailable()) {
-    const posts = await getBlogPosts()
-    return posts.map(post => {
-      // Convert blog post back to markdown format with frontmatter
-      const markdown = matter.stringify(post.content, {
-        title: post.title,
-        date: post.date,
-        tags: post.tags,
-        cover: post.cover,
+    try {
+      const posts = await getBlogPosts()
+      console.log(`📝 Retrieved ${posts.length} blog posts from Postgres`)
+      
+      if (posts.length === 0) {
+        console.warn('⚠️ No blog posts found in Postgres database')
+        return []
+      }
+      
+      return posts.map(post => {
+        // Convert blog post back to markdown format with frontmatter
+        const markdown = matter.stringify(post.content, {
+          title: post.title,
+          date: post.date,
+          tags: post.tags,
+          cover: post.cover,
+        })
+        return { slug: post.slug, content: markdown, filePath: '' }
       })
-      return { slug: post.slug, content: markdown, filePath: '' }
-    })
+    } catch (error) {
+      console.error('❌ Error reading blog posts from Postgres:', error)
+      // Fall through to filesystem fallback
+    }
   }
 
   // Fallback to filesystem

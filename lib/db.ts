@@ -109,30 +109,48 @@ export interface BlogPost {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   if (!isPostgresAvailable()) {
+    console.warn('⚠️ Postgres not available, returning empty blog posts array')
     return []
   }
 
   try {
+    console.log('🔍 Querying blog_posts table...')
     const result = await sql`
       SELECT slug, title, date, tags, cover, content
       FROM blog_posts
       ORDER BY date DESC, created_at DESC
     `
-    return result.rows.map(row => ({
-      slug: row.slug,
-      title: row.title,
+    
+    console.log(`✅ Found ${result.rows.length} blog posts in database`)
+    
+    const posts = result.rows.map(row => {
       // Ensure date is formatted as YYYY-MM-DD string
-      date: row.date instanceof Date 
-        ? row.date.toISOString().split('T')[0]
-        : typeof row.date === 'string'
-        ? row.date.split('T')[0] // Handle ISO string dates
-        : String(row.date),
-      tags: Array.isArray(row.tags) ? row.tags : [],
-      cover: row.cover || '',
-      content: row.content,
-    }))
-  } catch (error) {
-    console.error('Error reading blog posts:', error)
+      let dateStr = row.date
+      if (dateStr instanceof Date) {
+        dateStr = dateStr.toISOString().split('T')[0]
+      } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
+        dateStr = dateStr.split('T')[0]
+      } else if (typeof dateStr === 'string') {
+        dateStr = dateStr
+      } else {
+        dateStr = String(dateStr)
+      }
+      
+      return {
+        slug: row.slug,
+        title: row.title,
+        date: dateStr,
+        tags: Array.isArray(row.tags) ? row.tags : [],
+        cover: row.cover || '',
+        content: row.content || '',
+      }
+    })
+    
+    console.log(`📋 Returning ${posts.length} formatted blog posts`)
+    return posts
+  } catch (error: any) {
+    console.error('❌ Error reading blog posts:', error)
+    console.error('Error details:', error.message, error.code)
     return []
   }
 }
@@ -149,19 +167,32 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
       WHERE slug = ${slug}
     `
     if (result.rows.length === 0) {
+      console.log(`⚠️ Blog post with slug "${slug}" not found in database`)
       return null
     }
     const row = result.rows[0]
+    
+    // Format date as YYYY-MM-DD string
+    let dateStr = row.date
+    if (dateStr instanceof Date) {
+      dateStr = dateStr.toISOString().split('T')[0]
+    } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
+      dateStr = dateStr.split('T')[0]
+    } else if (typeof dateStr !== 'string') {
+      dateStr = String(dateStr)
+    }
+    
     return {
       slug: row.slug,
       title: row.title,
-      date: row.date,
-      tags: row.tags || [],
+      date: dateStr,
+      tags: Array.isArray(row.tags) ? row.tags : [],
       cover: row.cover || '',
-      content: row.content,
+      content: row.content || '',
     }
-  } catch (error) {
-    console.error(`Error reading blog post ${slug}:`, error)
+  } catch (error: any) {
+    console.error(`❌ Error reading blog post ${slug}:`, error)
+    console.error('Error details:', error.message, error.code)
     return null
   }
 }
@@ -190,19 +221,33 @@ export async function createBlogPost(post: BlogPost): Promise<{ success: boolean
       ? '{}'
       : `{${tagsArray.map(tag => `"${String(tag).replace(/"/g, '\\"')}"`).join(',')}}`
     
+    console.log(`📝 Inserting blog post "${post.slug}" into database...`)
+    console.log(`   Title: ${post.title}`)
+    console.log(`   Date: ${post.date}`)
+    console.log(`   Tags: ${tagsString}`)
+    console.log(`   Content length: ${(post.content || '').length} chars`)
+    
     await sql`
       INSERT INTO blog_posts (slug, title, date, tags, cover, content)
       VALUES (
         ${post.slug},
         ${post.title},
-        ${post.date},
+        ${post.date}::date,
         ${tagsString}::text[],
         ${post.cover || ''},
         ${post.content}
       )
     `
-    console.log(`✅ Blog post "${post.slug}" created successfully`)
-    return { success: true }
+    
+    // Verify the post was actually inserted by querying it back
+    const verifyPost = await getBlogPost(post.slug)
+    if (verifyPost) {
+      console.log(`✅ Blog post "${post.slug}" created and verified in database`)
+      return { success: true }
+    } else {
+      console.error(`❌ Blog post "${post.slug}" was inserted but cannot be retrieved`)
+      return { success: false, error: 'Post was created but cannot be retrieved. Please check database connection.' }
+    }
   } catch (error: any) {
     // Handle unique constraint violation
     if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
