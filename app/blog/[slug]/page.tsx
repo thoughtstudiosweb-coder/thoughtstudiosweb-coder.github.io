@@ -1,10 +1,13 @@
-import { readMarkdownFile } from '@/lib/content'
-import matter from 'gray-matter'
+import { getBlogPost } from '@/lib/db'
 import { marked } from 'marked'
 import { notFound } from 'next/navigation'
 import Header from '@/app/components/Header'
 import Footer from '@/app/components/Footer'
 import BlogImage from '@/app/components/BlogImage'
+
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -13,14 +16,13 @@ function formatDate(dateString: string) {
 }
 
 export default async function BlogPost({ params }: { params: { slug: string } }) {
-  const content = await readMarkdownFile(params.slug)
+  const post = await getBlogPost(params.slug)
   
-  if (!content) {
+  if (!post) {
     notFound()
   }
 
-  const { data, content: body } = matter(content)
-  const htmlContent = marked.parse(body)
+  const htmlContent = marked.parse(post.content || '')
 
   return (
     <>
@@ -30,14 +32,14 @@ export default async function BlogPost({ params }: { params: { slug: string } })
           <div className="blog-post-header">
             <div className="blog-post-image-container">
               <BlogImage
-                src={data.cover || ''}
-                alt={data.title || ''}
+                src={post.cover || ''}
+                alt={post.title || ''}
                 className="blog-post-image"
               />
             </div>
             <div className="blog-post-meta">
-              <div className="blog-post-date">{formatDate(data.date || '')}</div>
-              <h1 className="blog-post-title">{data.title}</h1>
+              <div className="blog-post-date">{formatDate(post.date || '')}</div>
+              <h1 className="blog-post-title">{post.title}</h1>
             </div>
           </div>
           <div

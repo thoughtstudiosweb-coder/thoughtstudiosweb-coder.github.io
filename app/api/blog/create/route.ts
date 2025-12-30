@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readMarkdownFile } from '@/lib/content'
 import { getSession } from '@/lib/auth'
 import { createBlogPost, isPostgresAvailable, getBlogPost } from '@/lib/db'
 import matter from 'gray-matter'

@@ -1,4 +1,4 @@
-import { getPost } from '../actions'
+import { getPost } from '../../actions'
 import EditBlogPost from './EditBlogPost'
 import { notFound } from 'next/navigation'
 
