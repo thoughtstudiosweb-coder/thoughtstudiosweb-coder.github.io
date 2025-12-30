@@ -8,12 +8,12 @@ export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    // Add a small delay to ensure fresh data from Postgres
-    // This helps with connection pooling delays in serverless environments
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Add delay to ensure fresh data from Postgres (matches getContent delay)
+    // readJSON calls getContent which has 500ms delay, but we add extra here for safety
+    await new Promise(resolve => setTimeout(resolve, 500))
     
     const beliefs = await readJSON('beliefs.json')
-    console.log(`📤 API: Returning ${Array.isArray(beliefs) ? beliefs.length : 0} beliefs`)
+    console.log(`📤 API /beliefs: Returning ${Array.isArray(beliefs) ? beliefs.length : 0} beliefs`)
     
     // Add no-cache headers to prevent browser caching
     return NextResponse.json(beliefs || [], {

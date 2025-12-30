@@ -56,9 +56,13 @@ export default function NewBlogPost() {
       const data = await res.json()
       
       if (res.ok) {
-        // Force a hard refresh to ensure the new post appears
-        router.push('/admin/blog')
-        router.refresh()
+        setMessage('Post created successfully! Redirecting...')
+        // Wait for connection pooling delay before redirecting
+        // This ensures the post is visible when the blog list page loads
+        setTimeout(() => {
+          router.push('/admin/blog')
+          router.refresh()
+        }, 2000)
       } else {
         setMessage(data.error || 'Error creating post')
       }

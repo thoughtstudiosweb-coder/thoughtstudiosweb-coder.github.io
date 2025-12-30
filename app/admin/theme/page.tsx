@@ -72,6 +72,14 @@ export default function ThemeEditor() {
           'Cache-Control': 'no-cache',
         },
       })
+      
+      if (!res.ok) {
+        console.error('Failed to load theme content:', res.status, res.statusText)
+        setMessage(`Failed to load: ${res.statusText}`)
+        setLoading(false)
+        return null
+      }
+      
       const data = await res.json()
       console.log('📥 Fetched theme from API:', data)
       console.log('📋 Data:', JSON.stringify(data, null, 2))
@@ -83,6 +91,7 @@ export default function ThemeEditor() {
       return data
     } catch (error) {
       console.error('Error loading theme content:', error)
+      setMessage('Error loading theme content')
       setLoading(false)
       return null
     }
@@ -110,7 +119,7 @@ export default function ThemeEditor() {
         setSaveSuccess(true)
         setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
-        // Increased delay to 2 seconds to ensure Postgres data is visible
+        // Increased delay to 3 seconds to ensure Postgres data is visible
         setTimeout(async () => {
           console.log('🔄 Refetching theme after save...')
           await fetchTheme()
@@ -119,7 +128,7 @@ export default function ThemeEditor() {
             setMessage('')
             setSaveSuccess(false)
           }, 2000)
-        }, 2000)
+        }, 3000)
       } else {
         setMessage('Error saving')
         setSaveSuccess(false)
@@ -258,7 +267,7 @@ export default function ThemeEditor() {
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-6 rounded-lg">
         {message && (
-          <div className={`p-3 rounded ${message.includes('Error') ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
+          <div className={`p-3 rounded ${message.includes('Error') || message.includes('Failed') ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
             {message}
           </div>
         )}

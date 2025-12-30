@@ -26,6 +26,14 @@ export default function WelcomeEditor() {
           'Cache-Control': 'no-cache',
         },
       })
+      
+      if (!res.ok) {
+        console.error('Failed to load welcome content:', res.status, res.statusText)
+        setMessage(`Failed to load: ${res.statusText}`)
+        setLoading(false)
+        return {}
+      }
+      
       const data = await res.json()
       console.log('📥 Fetched welcome from API:', data)
       console.log('📋 Data:', JSON.stringify(data, null, 2))
@@ -37,6 +45,7 @@ export default function WelcomeEditor() {
       return data
     } catch (error) {
       console.error('Error loading welcome content:', error)
+      setMessage('Error loading welcome content')
       setLoading(false)
       return {}
     }
@@ -62,7 +71,7 @@ export default function WelcomeEditor() {
         setSaveSuccess(true)
         setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
-        // Increased delay to 2 seconds to ensure Postgres data is visible
+        // Increased delay to 3 seconds to ensure Postgres data is visible
         setTimeout(async () => {
           console.log('🔄 Refetching welcome after save...')
           await fetchWelcome()
@@ -71,7 +80,7 @@ export default function WelcomeEditor() {
             setMessage('')
             setSaveSuccess(false)
           }, 2000)
-        }, 2000)
+        }, 3000)
       } else {
         setMessage('Error saving')
         setSaveSuccess(false)
@@ -106,7 +115,7 @@ export default function WelcomeEditor() {
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-6 rounded-lg">
         {message && (
-          <div className={`p-3 rounded ${message.includes('Error') ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
+          <div className={`p-3 rounded ${message.includes('Error') || message.includes('Failed') ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
             {message}
           </div>
         )}

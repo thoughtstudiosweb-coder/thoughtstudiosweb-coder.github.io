@@ -355,16 +355,22 @@ export async function updateBlogPost(slug: string, post: BlogPost): Promise<bool
 
 export async function deleteBlogPost(slug: string): Promise<boolean> {
   if (!isPostgresAvailable()) {
+    console.warn(`⚠️ Postgres not available, cannot delete blog post: ${slug}`)
     return false
   }
 
   try {
-    await sql`
+    console.log(`🗑️ Deleting blog post from database: ${slug}`)
+    const result = await sql`
       DELETE FROM blog_posts WHERE slug = ${slug}
     `
+    console.log(`✅ Blog post "${slug}" deleted from database`)
+    // Note: We don't add a delay here because the API route will handle it
+    // This ensures the deletion is confirmed before returning
     return true
-  } catch (error) {
-    console.error(`Error deleting blog post ${slug}:`, error)
+  } catch (error: any) {
+    console.error(`❌ Error deleting blog post ${slug}:`, error)
+    console.error('Error details:', error.message, error.code)
     return false
   }
 }

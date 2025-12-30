@@ -92,11 +92,26 @@ export async function POST(request: NextRequest) {
     const result = await createBlogPost(post)
     
     if (result.success) {
-      return NextResponse.json({ success: true, slug })
+      console.log(`✅ Blog post "${slug}" created successfully`)
+      // Add delay to ensure creation is visible in connection pool
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      return NextResponse.json(
+        { success: true, slug },
+        {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Content-Updated': new Date().toISOString(),
+          },
+        }
+      )
     }
     
     // Return specific error message
     const errorMessage = result.error || 'Failed to create post'
+    console.error(`❌ Failed to create blog post: ${errorMessage}`)
     return NextResponse.json(
       { error: errorMessage },
       { status: errorMessage.includes('already exists') ? 409 : 500 }

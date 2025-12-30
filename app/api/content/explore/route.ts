@@ -8,11 +8,12 @@ export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    // Add a small delay to ensure fresh data from Postgres
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Add delay to ensure fresh data from Postgres (matches getContent delay)
+    // readJSON calls getContent which has 500ms delay, but we add extra here for safety
+    await new Promise(resolve => setTimeout(resolve, 500))
     
     const explore = await readJSON('explore.json')
-    console.log(`📤 API: Returning ${Array.isArray(explore) ? explore.length : 0} explore items`)
+    console.log(`📤 API /explore: Returning ${Array.isArray(explore) ? explore.length : 0} explore items`)
     
     // Add no-cache headers to prevent browser caching
     return NextResponse.json(explore || [], {

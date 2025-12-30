@@ -68,7 +68,7 @@ export default function BeliefsEditor() {
         setSaveSuccess(true)
         setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
-        // Increased delay to 2 seconds to ensure Postgres data is visible
+        // Increased delay to 3 seconds to ensure Postgres data is visible
         setTimeout(async () => {
           console.log('🔄 Refetching beliefs after save...')
           await fetchBeliefs()
@@ -77,7 +77,7 @@ export default function BeliefsEditor() {
             setMessage('')
             setSaveSuccess(false)
           }, 2000)
-        }, 2000)
+        }, 3000)
       } else {
         const errorMsg = data.error || 'Error saving'
         const hint = data.hint ? `\n\n${data.hint}` : ''

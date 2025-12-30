@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { deleteMarkdownFile } from '@/lib/content'
+import { deleteBlogPost } from '@/lib/db'
 import { getSession } from '@/lib/auth'
+
+// Ensure this route is dynamic
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function DELETE(
   request: NextRequest,
@@ -13,19 +17,38 @@ export async function DELETE(
 
   try {
     const slug = params.slug
-    const success = await deleteMarkdownFile(slug)
+    console.log(`🗑️ Deleting blog post: ${slug}`)
+    
+    // Delete from Postgres directly
+    const success = await deleteBlogPost(slug)
     
     if (success) {
-      return NextResponse.json({ success: true })
+      console.log(`✅ Blog post "${slug}" deleted successfully`)
+      // Add delay to ensure deletion is visible in connection pool
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      return NextResponse.json(
+        { success: true },
+        {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Content-Updated': new Date().toISOString(),
+          },
+        }
+      )
     }
     
+    console.error(`❌ Failed to delete blog post: ${slug}`)
     return NextResponse.json(
       { error: 'Failed to delete post' },
       { status: 500 }
     )
-  } catch (error) {
+  } catch (error: any) {
+    console.error(`❌ Error deleting blog post:`, error)
     return NextResponse.json(
-      { error: 'Invalid request' },
+      { error: 'Invalid request', details: error?.message },
       { status: 400 }
     )
   }

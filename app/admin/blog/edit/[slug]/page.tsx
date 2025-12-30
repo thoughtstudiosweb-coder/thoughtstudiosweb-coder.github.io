@@ -18,16 +18,38 @@ export default function EditBlogPost() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    fetch(`/api/blog/${slug}`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchPost = async () => {
+      try {
+        // Add cache-busting timestamp and no-cache option
+        const res = await fetch(`/api/blog/${slug}?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        })
+        
+        if (!res.ok) {
+          console.error('Failed to fetch post:', res.status, res.statusText)
+          setMessage(`Failed to load post: ${res.statusText}`)
+          setLoading(false)
+          return
+        }
+        
+        const data = await res.json()
         setTitle(data.title || '')
         setDate(data.date || '')
         setTags(data.tags?.join(', ') || '')
         setCover(data.cover || '')
         setContent(data.content || '')
         setLoading(false)
-      })
+      } catch (error) {
+        console.error('Error fetching post:', error)
+        setMessage('Error loading post')
+        setLoading(false)
+      }
+    }
+    
+    fetchPost()
   }, [slug])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,9 +58,13 @@ export default function EditBlogPost() {
     setMessage('')
 
     try {
-      const res = await fetch(`/api/blog/update/${slug}`, {
+      const res = await fetch(`/api/blog/update/${slug}?t=${Date.now()}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+        cache: 'no-store',
         body: JSON.stringify({
           title,
           date,
@@ -49,9 +75,14 @@ export default function EditBlogPost() {
       })
 
       if (res.ok) {
-        router.push('/admin/blog')
+        setMessage('Post updated successfully! Redirecting...')
+        // Wait for connection pooling delay before redirecting
+        setTimeout(() => {
+          router.push('/admin/blog')
+        }, 2000)
       } else {
-        setMessage('Error updating post')
+        const error = await res.json().catch(() => ({}))
+        setMessage(error.error || 'Error updating post')
       }
     } catch (error) {
       setMessage('Error updating post')

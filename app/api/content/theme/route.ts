@@ -7,11 +7,12 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // Add a small delay to ensure fresh data from Postgres
-  await new Promise(resolve => setTimeout(resolve, 100))
+  // Add delay to ensure fresh data from Postgres (matches getContent delay)
+  // readJSON calls getContent which has 500ms delay, but we add extra here for safety
+  await new Promise(resolve => setTimeout(resolve, 500))
   
   const theme = await readJSON('theme.json')
-  console.log(`📤 API: Returning theme content`)
+  console.log(`📤 API /theme: Returning theme content`)
   
   // Add no-cache headers to prevent browser caching
   return NextResponse.json(theme, {

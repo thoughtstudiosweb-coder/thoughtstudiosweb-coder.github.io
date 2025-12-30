@@ -52,12 +52,27 @@ export default function BlogManager() {
   const handleDelete = async (slug: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return
 
-    const res = await fetch(`/api/blog/delete/${slug}`, {
+    console.log(`🗑️ Deleting post: ${slug}`)
+    const res = await fetch(`/api/blog/delete/${slug}?t=${Date.now()}`, {
       method: 'DELETE',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
     })
 
     if (res.ok) {
-      fetchPosts()
+      console.log(`✅ Delete successful, waiting before refetch...`)
+      // Wait longer after delete to ensure connection pooling has time to sync
+      // Increased to 3 seconds to ensure deletion is visible
+      setTimeout(() => {
+        console.log(`🔄 Refetching posts after delete...`)
+        fetchPosts()
+      }, 3000)
+    } else {
+      console.error(`❌ Delete failed:`, res.status, res.statusText)
+      const error = await res.json().catch(() => ({}))
+      alert(`Failed to delete post: ${error.error || res.statusText}`)
     }
   }
 
