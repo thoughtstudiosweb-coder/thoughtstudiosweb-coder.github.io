@@ -56,13 +56,45 @@ const COLOR_DESCRIPTIONS: Record<keyof ThemeColors, string> = {
   shadowColor: 'Shadow color (supports transparency)',
 }
 
+// Default theme structure
+const DEFAULT_THEME: Theme = {
+  dark: {
+    bgDark: '#1a1a1a',
+    bgCard: '#2a2a2a',
+    bgCardHover: '#3a3a3a',
+    textWhite: '#ffffff',
+    textGray: '#a0a0a0',
+    accentRoseGold: '#C19A6B',
+    accentRoseGoldLight: '#D4A574',
+    accentRoseGoldDark: '#B8860B',
+    borderColor: '#404040',
+    headerBg: 'rgba(26, 26, 26, 0.95)',
+    footerBg: 'rgba(26, 26, 26, 0.95)',
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  light: {
+    bgDark: '#f5f5f5',
+    bgCard: '#ffffff',
+    bgCardHover: '#f0f0f0',
+    textWhite: '#1a1a1a',
+    textGray: '#666666',
+    accentRoseGold: '#C19A6B',
+    accentRoseGoldLight: '#D4A574',
+    accentRoseGoldDark: '#B8860B',
+    borderColor: '#e0e0e0',
+    headerBg: 'rgba(255, 255, 255, 0.95)',
+    footerBg: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+  },
+}
+
 export default function ThemeEditor({ initialData }: ThemeEditorProps) {
   const router = useRouter()
-  const [theme, setTheme] = useState<Theme | null>(initialData)
+  const [theme, setTheme] = useState<Theme>(initialData || DEFAULT_THEME)
 
   // Sync with server props when they change (after router.refresh())
   useEffect(() => {
-    setTheme(initialData)
+    setTheme(initialData || DEFAULT_THEME)
   }, [initialData])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -114,10 +146,6 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
 
   const openGradientBuilder = (mode: 'dark' | 'light', key: keyof ThemeColors) => {
     setGradientBuilder({ mode, key })
-  }
-
-  if (!theme) {
-    return <div className="text-white">Loading...</div>
   }
 
   const currentTheme = theme[activeMode]

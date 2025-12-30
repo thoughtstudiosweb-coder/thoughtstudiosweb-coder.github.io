@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // CRITICAL: Increase delay to ensure connection pooling has fully synced
     // This is especially important when CMS refreshes after a save operation
     // The delay must be long enough for the write connection to propagate to read connections
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 200))
     
     const beliefs = await readJSON('beliefs.json')
     console.log(`📤 API /beliefs: Returning ${Array.isArray(beliefs) ? beliefs.length : 0} beliefs`)

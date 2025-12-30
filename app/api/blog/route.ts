@@ -8,10 +8,9 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // CRITICAL: Increase delay to ensure connection pooling has fully synced
-  // This is especially important when CMS refreshes after a save/delete operation
-  // The delay must be long enough for the write connection to propagate to read connections
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  // Small delay to handle connection pooling (Neon DB)
+  // Reduced to 200ms for better performance
+  await new Promise(resolve => setTimeout(resolve, 200))
   
   // Try Postgres first (more efficient)
   if (isPostgresAvailable()) {
