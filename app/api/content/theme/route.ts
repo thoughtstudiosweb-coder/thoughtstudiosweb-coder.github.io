@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readJSON, writeJSON } from '@/lib/content'
 import { getSession } from '@/lib/auth'
 
+// Ensure this route is dynamic
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET() {
   const theme = await readJSON('theme.json')
   return NextResponse.json(theme)
@@ -9,7 +13,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   const session = await getSession()
-  if (!session || !session.loggedIn) {
+  if (!session || !(session as any).loggedIn) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

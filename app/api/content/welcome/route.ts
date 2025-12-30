@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readJSON, writeJSON } from '@/lib/content'
 import { getSession } from '@/lib/auth'
 
+// Ensure this route is dynamic
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET() {
   const welcome = await readJSON('welcome.json')
   return NextResponse.json(welcome)
