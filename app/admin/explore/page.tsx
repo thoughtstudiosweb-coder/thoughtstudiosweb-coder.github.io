@@ -64,6 +64,7 @@ export default function ExploreEditor() {
         setSaveSuccess(true)
         setMessage('Saved successfully! Refreshing data...')
         // Wait for connection pooling delay, then refetch to show updated data
+        // Increased delay to 2 seconds to ensure Postgres data is visible
         setTimeout(async () => {
           console.log('🔄 Refetching explore after save...')
           await fetchExplore()
@@ -72,7 +73,7 @@ export default function ExploreEditor() {
             setMessage('')
             setSaveSuccess(false)
           }, 2000)
-        }, 1500)
+        }, 2000)
       } else {
         const errorMsg = data.error || 'Error saving'
         const hint = data.hint ? `\n\n${data.hint}` : ''
@@ -109,12 +110,24 @@ export default function ExploreEditor() {
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Edit Explore Section</h1>
-        <button
-          onClick={addExplore}
-          className="px-4 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark"
-        >
-          Add Card
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              setLoading(true)
+              await fetchExplore()
+            }}
+            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+            title="Refresh data from server"
+          >
+            🔄 Refresh
+          </button>
+          <button
+            onClick={addExplore}
+            className="px-4 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark"
+          >
+            Add Card
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

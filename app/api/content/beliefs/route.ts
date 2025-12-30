@@ -6,15 +6,22 @@ import { getSession } from '@/lib/auth'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Add a small delay to ensure fresh data from Postgres
+    // This helps with connection pooling delays in serverless environments
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
     const beliefs = await readJSON('beliefs.json')
+    console.log(`📤 API: Returning ${Array.isArray(beliefs) ? beliefs.length : 0} beliefs`)
+    
     // Add no-cache headers to prevent browser caching
     return NextResponse.json(beliefs || [], {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0',
+        'X-Content-Updated': new Date().toISOString(),
       },
     })
   } catch (error: any) {

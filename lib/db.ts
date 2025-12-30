@@ -69,12 +69,15 @@ export async function getContent(key: string): Promise<any | null> {
 
   try {
     // Add a delay to handle connection pooling (Neon DB)
-    // Increased to 300ms to ensure data is visible after writes
-    await new Promise(resolve => setTimeout(resolve, 300))
+    // Increased to 500ms to ensure data is visible after writes
+    // This is critical for serverless environments with connection pooling
+    await new Promise(resolve => setTimeout(resolve, 500))
     
     console.log(`🔍 Querying content table for key: ${key}`)
     const result = await sql`
       SELECT value, updated_at FROM content WHERE key = ${key}
+      ORDER BY updated_at DESC
+      LIMIT 1
     `
     if (result.rows.length > 0) {
       console.log(`✅ Found content for key: ${key} (updated: ${result.rows[0].updated_at})`)

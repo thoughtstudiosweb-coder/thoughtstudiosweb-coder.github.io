@@ -6,14 +6,20 @@ import { getSession } from '@/lib/auth'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Add a small delay to ensure fresh data from Postgres
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   const welcome = await readJSON('welcome.json')
+  console.log(`📤 API: Returning welcome content`)
+  
   // Add no-cache headers to prevent browser caching
   return NextResponse.json(welcome, {
     headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',
       'Expires': '0',
+      'X-Content-Updated': new Date().toISOString(),
     },
   })
 }
