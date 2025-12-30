@@ -24,12 +24,21 @@ const nextConfig = {
     scrollRestoration: false,
   },
   // Webpack configuration for path aliases
-  webpack: (config) => {
-    // Resolve @ alias to project root
+  webpack: (config, { isServer }) => {
+    const projectRoot = path.resolve(__dirname)
+    
+    // Resolve @ alias to project root - handle both @ and @/*
     config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname),
+      ...(config.resolve.alias || {}),
+      '@': projectRoot,
     }
+    
+    // Ensure proper module resolution
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      ...(config.resolve.modules || []),
+    ]
+    
     return config
   },
 }
