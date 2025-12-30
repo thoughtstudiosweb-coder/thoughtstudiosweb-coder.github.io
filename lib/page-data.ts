@@ -35,7 +35,12 @@ export interface PageData {
  * This centralizes data fetching to avoid duplication across pages.
  */
 export async function getPageData(): Promise<PageData> {
+  console.log('🔄 getPageData: Starting fresh data fetch...')
+  
   // Fetch welcome, beliefs, and explore content
+  // Add a small delay to ensure we're not hitting cached connections
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   const welcome = await readJSON<{
     title: string
     subtitle: string

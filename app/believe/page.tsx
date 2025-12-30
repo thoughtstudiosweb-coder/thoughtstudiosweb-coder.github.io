@@ -8,6 +8,10 @@ import Development from '../components/Development'
 import Footer from '../components/Footer'
 import ScrollToSection from '../components/ScrollToSection'
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function BelievePage() {
   // Fetch all page data using centralized function
   const { welcome, beliefs, explore, blogPosts } = await getPageData()
