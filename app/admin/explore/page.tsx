@@ -19,9 +19,19 @@ export default function ExploreEditor() {
 
   useEffect(() => {
     fetch('/api/content/explore')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          console.error('Failed to load explore content:', res.status, res.statusText)
+          return []
+        }
+        return res.json()
+      })
       .then((data) => {
         setExplore(data || [])
+        setLoading(false)
+      })
+      .catch((error) => {
+        console.error('Error loading explore content:', error)
         setLoading(false)
       })
   }, [])
@@ -38,6 +48,8 @@ export default function ExploreEditor() {
         body: JSON.stringify(explore),
       })
 
+      const data = await res.json()
+      
       if (res.ok) {
         setSaveSuccess(true)
         setMessage('Saved successfully!')
@@ -46,7 +58,9 @@ export default function ExploreEditor() {
           setSaveSuccess(false)
         }, 3000)
       } else {
-        setMessage('Error saving')
+        const errorMsg = data.error || 'Error saving'
+        const hint = data.hint ? `\n\n${data.hint}` : ''
+        setMessage(`${errorMsg}${hint}`)
         setSaveSuccess(false)
       }
     } catch (error) {
