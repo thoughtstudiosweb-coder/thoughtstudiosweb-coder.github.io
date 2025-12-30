@@ -32,7 +32,11 @@ export default function ExploreEditor() {
       }
       const data = await res.json()
       console.log('📥 Fetched explore from API:', data.length, 'items')
-      setExplore(data || [])
+      console.log('📋 Data:', JSON.stringify(data, null, 2))
+      // Force state update by creating a new array reference
+      const newExplore = Array.isArray(data) ? [...data] : []
+      console.log('🔄 Setting explore state with', newExplore.length, 'items')
+      setExplore(newExplore)
       setLoading(false)
       return data
     } catch (error) {

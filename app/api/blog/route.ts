@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getBlogPosts, isPostgresAvailable } from '@/lib/db'
 import { readMarkdownFiles } from '@/lib/content'
 import matter from 'gray-matter'
@@ -7,11 +7,15 @@ import matter from 'gray-matter'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Add a small delay to ensure fresh data from Postgres
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   // Try Postgres first (more efficient)
   if (isPostgresAvailable()) {
     try {
       const posts = await getBlogPosts()
+      console.log(`📤 API: Returning ${posts.length} blog posts from Postgres`)
       // Format posts for API response with excerpt
       const formattedPosts = posts.map(post => {
         // Ensure date is a string in YYYY-MM-DD format
@@ -39,7 +43,15 @@ export async function GET() {
         return new Date(b.date).getTime() - new Date(a.date).getTime()
       })
       
-      return NextResponse.json(formattedPosts)
+      // Add no-cache headers to prevent browser caching
+      return NextResponse.json(formattedPosts, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Content-Updated': new Date().toISOString(),
+        },
+      })
     } catch (error) {
       console.error('Error fetching blog posts from Postgres:', error)
       // Fall through to filesystem fallback

@@ -32,7 +32,11 @@ export default function BeliefsEditor() {
       }
       const data = await res.json()
       console.log('📥 Fetched beliefs from API:', data.length, 'items')
-      setBeliefs(data || [])
+      console.log('📋 Data:', JSON.stringify(data, null, 2))
+      // Force state update by creating a new array reference
+      const newBeliefs = Array.isArray(data) ? [...data] : []
+      console.log('🔄 Setting beliefs state with', newBeliefs.length, 'items')
+      setBeliefs(newBeliefs)
       setLoading(false)
       return data
     } catch (error) {

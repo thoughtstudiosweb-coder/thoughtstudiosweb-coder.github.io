@@ -74,7 +74,11 @@ export default function ThemeEditor() {
       })
       const data = await res.json()
       console.log('📥 Fetched theme from API:', data)
-      setTheme(data)
+      console.log('📋 Data:', JSON.stringify(data, null, 2))
+      // Force state update by creating a new object reference
+      const newTheme = data ? JSON.parse(JSON.stringify(data)) : null
+      console.log('🔄 Setting theme state')
+      setTheme(newTheme)
       setLoading(false)
       return data
     } catch (error) {

@@ -22,7 +22,13 @@ export default function BlogManager() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch('/api/blog')
+      // Add cache-busting timestamp and no-cache option
+      const res = await fetch(`/api/blog?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
       if (!res.ok) {
         console.error('Failed to fetch posts:', res.status, res.statusText)
         setPosts([])
@@ -30,8 +36,11 @@ export default function BlogManager() {
         return
       }
       const data = await res.json()
-      console.log('Fetched posts:', data.length, 'posts')
-      setPosts(Array.isArray(data) ? data : [])
+      console.log('📥 Fetched posts from API:', data.length, 'posts')
+      // Force state update by creating a new array reference
+      const newPosts = Array.isArray(data) ? [...data] : []
+      console.log('🔄 Setting posts state with', newPosts.length, 'posts')
+      setPosts(newPosts)
     } catch (error) {
       console.error('Error fetching posts:', error)
       setPosts([])
@@ -60,12 +69,24 @@ export default function BlogManager() {
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Blog Posts</h1>
-        <Link
-          href="/admin/blog/new"
-          className="px-4 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark"
-        >
-          New Post
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              setLoading(true)
+              await fetchPosts()
+            }}
+            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+            title="Refresh data from server"
+          >
+            🔄 Refresh
+          </button>
+          <Link
+            href="/admin/blog/new"
+            className="px-4 py-2 bg-rose-gold text-white rounded-md hover:bg-rose-gold-dark"
+          >
+            New Post
+          </Link>
+        </div>
       </div>
 
       <div className="space-y-4">

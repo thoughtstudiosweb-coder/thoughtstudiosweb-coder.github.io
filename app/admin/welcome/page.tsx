@@ -28,7 +28,11 @@ export default function WelcomeEditor() {
       })
       const data = await res.json()
       console.log('📥 Fetched welcome from API:', data)
-      setData(data || {})
+      console.log('📋 Data:', JSON.stringify(data, null, 2))
+      // Force state update by creating a new object reference
+      const newData = data ? { ...data } : {}
+      console.log('🔄 Setting welcome state')
+      setData(newData)
       setLoading(false)
       return data
     } catch (error) {
