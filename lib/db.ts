@@ -68,9 +68,9 @@ export async function getContent(key: string): Promise<any | null> {
   }
 
   try {
-    // Add a small delay to handle connection pooling (Neon DB)
-    // This helps ensure we're reading from the same connection pool
-    await new Promise(resolve => setTimeout(resolve, 50))
+    // Add a delay to handle connection pooling (Neon DB)
+    // Increased to 200ms to ensure data is visible after writes
+    await new Promise(resolve => setTimeout(resolve, 200))
     
     const result = await sql`
       SELECT value FROM content WHERE key = ${key}

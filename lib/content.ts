@@ -32,11 +32,14 @@ export async function readJSON<T>(fileName: string): Promise<T | null> {
       console.log(`✅ Read ${fileName} from Postgres (key: ${key})`)
       return content as T
     } else {
-      console.log(`⚠️ ${fileName} not found in Postgres (key: ${key}), checking filesystem...`)
+      console.log(`⚠️ ${fileName} not found in Postgres (key: ${key})`)
+      // Don't fall back to filesystem if Postgres is available
+      // This ensures we only use Postgres data when Postgres is configured
+      return null
     }
   }
 
-  // Fallback to filesystem (only if Postgres is not available or returned null)
+  // Fallback to filesystem (only if Postgres is NOT available)
   try {
     const filePath = getContentFile(fileName)
     if (!fs.existsSync(filePath)) {
@@ -45,7 +48,7 @@ export async function readJSON<T>(fileName: string): Promise<T | null> {
     }
     const fileContents = fs.readFileSync(filePath, 'utf8')
     const parsed = JSON.parse(fileContents) as T
-    console.log(`📁 Read ${fileName} from filesystem (Postgres unavailable or returned null)`)
+    console.log(`📁 Read ${fileName} from filesystem (Postgres unavailable)`)
     return parsed
   } catch (error) {
     console.error(`❌ Error reading ${fileName}:`, error)
@@ -99,15 +102,20 @@ export async function readMarkdownFiles() {
           return { slug: post.slug, content: markdown, filePath: '' }
         })
       } else {
-        console.warn('⚠️ No blog posts found in Postgres database, checking filesystem...')
+        console.warn('⚠️ No blog posts found in Postgres database')
+        // Don't fall back to filesystem if Postgres is available
+        // This ensures we only use Postgres data when Postgres is configured
+        return []
       }
     } catch (error) {
       console.error('❌ Error reading blog posts from Postgres:', error)
-      // Fall through to filesystem fallback
+      // Don't fall back to filesystem if Postgres is available but errored
+      // Return empty array to force using Postgres data
+      return []
     }
   }
 
-  // Fallback to filesystem
+  // Fallback to filesystem (only if Postgres is NOT available)
   const blogDir = path.join(contentDir, 'blog')
   if (!fs.existsSync(blogDir)) {
     try {
@@ -142,12 +150,19 @@ export async function readMarkdownFile(slug: string): Promise<string | null> {
         cover: post.cover,
       })
     }
+    // Don't fall back to filesystem if Postgres is available
+    // This ensures we only use Postgres data when Postgres is configured
+    console.log(`⚠️ Blog post "${slug}" not found in Postgres`)
     return null
   }
 
-  // Fallback to filesystem
+  // Fallback to filesystem (only if Postgres is NOT available)
   const filePath = path.join(contentDir, 'blog', `${slug}.md`)
-  if (!fs.existsSync(filePath)) return null
+  if (!fs.existsSync(filePath)) {
+    console.log(`⚠️ Blog post "${slug}" not found in filesystem either`)
+    return null
+  }
+  console.log(`📁 Read blog post "${slug}" from filesystem (Postgres unavailable)`)
   return fs.readFileSync(filePath, 'utf8')
 }
 
