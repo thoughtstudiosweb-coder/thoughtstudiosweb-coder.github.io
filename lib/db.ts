@@ -69,17 +69,19 @@ export async function getContent(key: string): Promise<any | null> {
 
   try {
     // Add a delay to handle connection pooling (Neon DB)
-    // Increased to 200ms to ensure data is visible after writes
-    await new Promise(resolve => setTimeout(resolve, 200))
+    // Increased to 300ms to ensure data is visible after writes
+    await new Promise(resolve => setTimeout(resolve, 300))
     
+    console.log(`🔍 Querying content table for key: ${key}`)
     const result = await sql`
-      SELECT value FROM content WHERE key = ${key}
+      SELECT value, updated_at FROM content WHERE key = ${key}
     `
     if (result.rows.length > 0) {
-      console.log(`✅ Found content for key: ${key}`)
+      console.log(`✅ Found content for key: ${key} (updated: ${result.rows[0].updated_at})`)
       return result.rows[0].value
     } else {
-      console.log(`⚠️ No content found for key: ${key}`)
+      console.log(`⚠️ No content found for key: ${key} in Postgres database`)
+      console.log(`   This means the data needs to be saved to Postgres first via CMS.`)
       return null
     }
   } catch (error: any) {
@@ -140,13 +142,19 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
   try {
     console.log('🔍 Querying blog_posts table...')
+    // Add a delay to handle connection pooling (Neon DB)
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
     const result = await sql`
-      SELECT slug, title, date, tags, cover, content
+      SELECT slug, title, date, tags, cover, content, created_at
       FROM blog_posts
       ORDER BY date DESC, created_at DESC
     `
     
     console.log(`✅ Found ${result.rows.length} blog posts in database`)
+    if (result.rows.length > 0) {
+      console.log(`   Latest post: "${result.rows[0].title}" (created: ${result.rows[0].created_at})`)
+    }
     
     const posts = result.rows.map(row => {
       // Ensure date is formatted as YYYY-MM-DD string

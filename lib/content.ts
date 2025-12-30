@@ -24,22 +24,27 @@ export function getContentFile(fileName: string) {
 
 // Read JSON with Postgres fallback to filesystem
 export async function readJSON<T>(fileName: string): Promise<T | null> {
-  // Try Postgres first
+  // ALWAYS try Postgres first if available
   if (isPostgresAvailable()) {
     const key = fileName.replace('.json', '') // Remove .json extension for key
+    console.log(`🔍 Attempting to read ${fileName} from Postgres (key: ${key})...`)
+    
     const content = await getContent(key)
     if (content !== null) {
-      console.log(`✅ Read ${fileName} from Postgres (key: ${key})`)
+      console.log(`✅ SUCCESS: Read ${fileName} from Postgres (key: ${key})`)
       return content as T
     } else {
-      console.log(`⚠️ ${fileName} not found in Postgres (key: ${key})`)
-      // Don't fall back to filesystem if Postgres is available
+      console.log(`⚠️ ${fileName} NOT FOUND in Postgres (key: ${key})`)
+      console.log(`   This means the data needs to be saved to Postgres first via CMS.`)
+      console.log(`   NOT falling back to filesystem - forcing Postgres-only mode.`)
+      // CRITICAL: Don't fall back to filesystem if Postgres is available
       // This ensures we only use Postgres data when Postgres is configured
       return null
     }
   }
 
-  // Fallback to filesystem (only if Postgres is NOT available)
+  // Fallback to filesystem (ONLY if Postgres is NOT available)
+  console.log(`📁 Postgres not available, falling back to filesystem for ${fileName}`)
   try {
     const filePath = getContentFile(fileName)
     if (!fs.existsSync(filePath)) {
@@ -84,13 +89,15 @@ export async function writeJSON<T>(fileName: string, data: T): Promise<boolean> 
 
 // Read markdown files with Postgres fallback to filesystem
 export async function readMarkdownFiles() {
-  // Try Postgres first
+  // ALWAYS try Postgres first if available
   if (isPostgresAvailable()) {
+    console.log(`🔍 Attempting to read blog posts from Postgres...`)
     try {
       const posts = await getBlogPosts()
       console.log(`📝 Retrieved ${posts.length} blog posts from Postgres`)
       
       if (posts.length > 0) {
+        console.log(`✅ SUCCESS: Returning ${posts.length} blog posts from Postgres`)
         return posts.map(post => {
           // Convert blog post back to markdown format with frontmatter
           const markdown = matter.stringify(post.content, {
@@ -103,19 +110,22 @@ export async function readMarkdownFiles() {
         })
       } else {
         console.warn('⚠️ No blog posts found in Postgres database')
-        // Don't fall back to filesystem if Postgres is available
+        console.warn('   NOT falling back to filesystem - forcing Postgres-only mode.')
+        // CRITICAL: Don't fall back to filesystem if Postgres is available
         // This ensures we only use Postgres data when Postgres is configured
         return []
       }
     } catch (error) {
       console.error('❌ Error reading blog posts from Postgres:', error)
-      // Don't fall back to filesystem if Postgres is available but errored
+      console.error('   NOT falling back to filesystem - forcing Postgres-only mode.')
+      // CRITICAL: Don't fall back to filesystem if Postgres is available but errored
       // Return empty array to force using Postgres data
       return []
     }
   }
-
-  // Fallback to filesystem (only if Postgres is NOT available)
+  
+  // Fallback to filesystem (ONLY if Postgres is NOT available)
+  console.log(`📁 Postgres not available, falling back to filesystem for blog posts`)
   const blogDir = path.join(contentDir, 'blog')
   if (!fs.existsSync(blogDir)) {
     try {

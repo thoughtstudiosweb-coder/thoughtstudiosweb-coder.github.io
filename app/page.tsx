@@ -9,6 +9,10 @@ import Development from './components/Development'
 import Footer from './components/Footer'
 import ScrollAnimations from './components/ScrollAnimations'
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function Home() {
   let welcome = await readJSON<{
     title: string
