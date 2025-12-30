@@ -83,7 +83,8 @@ export async function setContent(key: string, value: any): Promise<boolean> {
   }
 
   try {
-    await sql`
+    console.log(`💾 Saving content for key: ${key}`)
+    const result = await sql`
       INSERT INTO content (key, value, updated_at)
       VALUES (${key}, ${JSON.stringify(value)}::jsonb, CURRENT_TIMESTAMP)
       ON CONFLICT (key) 
@@ -91,9 +92,29 @@ export async function setContent(key: string, value: any): Promise<boolean> {
         value = ${JSON.stringify(value)}::jsonb,
         updated_at = CURRENT_TIMESTAMP
     `
-    return true
-  } catch (error) {
-    console.error(`Error writing content ${key}:`, error)
+    
+    // Wait a brief moment for the database to commit (connection pooling can cause delays)
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Verify the content was saved
+    const verify = await getContent(key)
+    if (verify) {
+      console.log(`✅ Content saved and verified for key: ${key}`)
+      return true
+    } else {
+      console.error(`❌ Content saved but cannot be retrieved for key: ${key}`)
+      // Wait and retry once (connection pooling issue)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      const retryVerify = await getContent(key)
+      if (retryVerify) {
+        console.log(`✅ Content verified on retry for key: ${key}`)
+        return true
+      }
+      return false
+    }
+  } catch (error: any) {
+    console.error(`❌ Error writing content ${key}:`, error)
+    console.error('Error details:', error.message, error.code)
     return false
   }
 }
@@ -228,7 +249,8 @@ export async function createBlogPost(post: BlogPost): Promise<{ success: boolean
     console.log(`   Tags: ${tagsString}`)
     console.log(`   Content length: ${(post.content || '').length} chars`)
     
-    await sql`
+    // Insert the post
+    const insertResult = await sql`
       INSERT INTO blog_posts (slug, title, date, tags, cover, content)
       VALUES (
         ${post.slug},
@@ -238,7 +260,18 @@ export async function createBlogPost(post: BlogPost): Promise<{ success: boolean
         ${post.cover || ''},
         ${post.content}
       )
+      RETURNING slug
     `
+    
+    if (insertResult.rows.length === 0) {
+      console.error(`❌ Blog post "${post.slug}" INSERT returned no rows`)
+      return { success: false, error: 'Post insertion failed - no rows returned' }
+    }
+    
+    console.log(`✅ Blog post "${post.slug}" inserted successfully`)
+    
+    // Wait a brief moment for the database to commit (connection pooling can cause delays)
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     // Verify the post was actually inserted by querying it back
     const verifyPost = await getBlogPost(post.slug)
@@ -246,8 +279,18 @@ export async function createBlogPost(post: BlogPost): Promise<{ success: boolean
       console.log(`✅ Blog post "${post.slug}" created and verified in database`)
       return { success: true }
     } else {
-      console.error(`❌ Blog post "${post.slug}" was inserted but cannot be retrieved`)
-      return { success: false, error: 'Post was created but cannot be retrieved. Please check database connection.' }
+      // Try one more time after a longer delay (connection pooling issue)
+      console.log(`⏳ Retrying verification for "${post.slug}" after delay...`)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const retryVerify = await getBlogPost(post.slug)
+      if (retryVerify) {
+        console.log(`✅ Blog post "${post.slug}" verified on retry`)
+        return { success: true }
+      }
+      
+      console.error(`❌ Blog post "${post.slug}" was inserted but cannot be retrieved after retry`)
+      console.error(`   Insert returned: ${insertResult.rows.length} rows`)
+      return { success: false, error: 'Post was created but cannot be retrieved. This may be a connection pooling issue. Please refresh and check again.' }
     }
   } catch (error: any) {
     // Handle unique constraint violation
