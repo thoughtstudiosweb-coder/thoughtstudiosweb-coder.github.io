@@ -63,13 +63,22 @@ export default function ThemeEditor() {
   } | null>(null)
   const [showExamples, setShowExamples] = useState(false)
 
+  const fetchTheme = async () => {
+    try {
+      const res = await fetch('/api/content/theme')
+      const data = await res.json()
+      setTheme(data)
+      setLoading(false)
+      return data
+    } catch (error) {
+      console.error('Error loading theme content:', error)
+      setLoading(false)
+      return null
+    }
+  }
+
   useEffect(() => {
-    fetch('/api/content/theme')
-      .then((res) => res.json())
-      .then((data) => {
-        setTheme(data)
-        setLoading(false)
-      })
+    fetchTheme()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,11 +97,13 @@ export default function ThemeEditor() {
 
       if (res.ok) {
         setSaveSuccess(true)
-        setMessage('Saved successfully! Refresh the page to see changes.')
-        setTimeout(() => {
+        setMessage('Saved successfully!')
+        // Wait for connection pooling delay, then refetch to show updated data
+        setTimeout(async () => {
+          await fetchTheme()
           setMessage('')
           setSaveSuccess(false)
-        }, 5000)
+        }, 1500)
       } else {
         setMessage('Error saving')
         setSaveSuccess(false)

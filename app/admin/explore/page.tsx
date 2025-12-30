@@ -17,23 +17,26 @@ export default function ExploreEditor() {
   const [message, setMessage] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
 
+  const fetchExplore = async () => {
+    try {
+      const res = await fetch('/api/content/explore')
+      if (!res.ok) {
+        console.error('Failed to load explore content:', res.status, res.statusText)
+        return []
+      }
+      const data = await res.json()
+      setExplore(data || [])
+      setLoading(false)
+      return data
+    } catch (error) {
+      console.error('Error loading explore content:', error)
+      setLoading(false)
+      return []
+    }
+  }
+
   useEffect(() => {
-    fetch('/api/content/explore')
-      .then((res) => {
-        if (!res.ok) {
-          console.error('Failed to load explore content:', res.status, res.statusText)
-          return []
-        }
-        return res.json()
-      })
-      .then((data) => {
-        setExplore(data || [])
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.error('Error loading explore content:', error)
-        setLoading(false)
-      })
+    fetchExplore()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,10 +56,12 @@ export default function ExploreEditor() {
       if (res.ok) {
         setSaveSuccess(true)
         setMessage('Saved successfully!')
-        setTimeout(() => {
+        // Wait for connection pooling delay, then refetch to show updated data
+        setTimeout(async () => {
+          await fetchExplore()
           setMessage('')
           setSaveSuccess(false)
-        }, 3000)
+        }, 1500)
       } else {
         const errorMsg = data.error || 'Error saving'
         const hint = data.hint ? `\n\n${data.hint}` : ''

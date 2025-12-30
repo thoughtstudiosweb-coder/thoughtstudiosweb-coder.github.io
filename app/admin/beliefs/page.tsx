@@ -17,23 +17,26 @@ export default function BeliefsEditor() {
   const [message, setMessage] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
 
+  const fetchBeliefs = async () => {
+    try {
+      const res = await fetch('/api/content/beliefs')
+      if (!res.ok) {
+        console.error('Failed to load beliefs content:', res.status, res.statusText)
+        return []
+      }
+      const data = await res.json()
+      setBeliefs(data || [])
+      setLoading(false)
+      return data
+    } catch (error) {
+      console.error('Error loading beliefs content:', error)
+      setLoading(false)
+      return []
+    }
+  }
+
   useEffect(() => {
-    fetch('/api/content/beliefs')
-      .then((res) => {
-        if (!res.ok) {
-          console.error('Failed to load beliefs content:', res.status, res.statusText)
-          return []
-        }
-        return res.json()
-      })
-      .then((data) => {
-        setBeliefs(data || [])
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.error('Error loading beliefs content:', error)
-        setLoading(false)
-      })
+    fetchBeliefs()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,10 +56,12 @@ export default function BeliefsEditor() {
       if (res.ok) {
         setSaveSuccess(true)
         setMessage('Saved successfully!')
-        setTimeout(() => {
+        // Wait for connection pooling delay, then refetch to show updated data
+        setTimeout(async () => {
+          await fetchBeliefs()
           setMessage('')
           setSaveSuccess(false)
-        }, 3000)
+        }, 1500)
       } else {
         const errorMsg = data.error || 'Error saving'
         const hint = data.hint ? `\n\n${data.hint}` : ''

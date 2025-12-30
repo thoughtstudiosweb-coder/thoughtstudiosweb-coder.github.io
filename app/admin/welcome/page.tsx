@@ -17,13 +17,22 @@ export default function WelcomeEditor() {
   const [message, setMessage] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
 
+  const fetchWelcome = async () => {
+    try {
+      const res = await fetch('/api/content/welcome')
+      const data = await res.json()
+      setData(data || {})
+      setLoading(false)
+      return data
+    } catch (error) {
+      console.error('Error loading welcome content:', error)
+      setLoading(false)
+      return {}
+    }
+  }
+
   useEffect(() => {
-    fetch('/api/content/welcome')
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data || {})
-        setLoading(false)
-      })
+    fetchWelcome()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,10 +50,12 @@ export default function WelcomeEditor() {
       if (res.ok) {
         setSaveSuccess(true)
         setMessage('Saved successfully!')
-        setTimeout(() => {
+        // Wait for connection pooling delay, then refetch to show updated data
+        setTimeout(async () => {
+          await fetchWelcome()
           setMessage('')
           setSaveSuccess(false)
-        }, 3000)
+        }, 1500)
       } else {
         setMessage('Error saving')
         setSaveSuccess(false)
