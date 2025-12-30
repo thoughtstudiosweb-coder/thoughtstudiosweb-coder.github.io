@@ -15,11 +15,13 @@ export async function GET() {
       // Format posts for API response with excerpt
       const formattedPosts = posts.map(post => {
         // Ensure date is a string in YYYY-MM-DD format
-        let dateStr = post.date
-        if (dateStr instanceof Date) {
-          dateStr = dateStr.toISOString().split('T')[0]
-        } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
+        // post.date is already a string from getBlogPosts(), but handle edge cases
+        let dateStr: string = post.date
+        if (typeof dateStr === 'string' && dateStr.includes('T')) {
           dateStr = dateStr.split('T')[0]
+        } else if (typeof dateStr !== 'string') {
+          // Fallback: convert to string
+          dateStr = String(dateStr)
         }
         
         return {

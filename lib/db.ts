@@ -2,9 +2,10 @@ import { sql } from '@vercel/postgres'
 
 // Check if Postgres is available
 export function isPostgresAvailable(): boolean {
-  // Vercel Postgres provides POSTGRES_URL automatically
+  // Supports both Vercel Postgres and Neon DB
+  // Neon DB uses POSTGRES_URL, which is compatible with @vercel/postgres
   // Also check for POSTGRES_PRISMA_URL or POSTGRES_URL_NON_POOLING
-  return !!(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING)
+  return !!(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL)
 }
 
 // Initialize database tables (run once)
