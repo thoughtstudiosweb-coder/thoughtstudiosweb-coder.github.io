@@ -48,37 +48,51 @@ export async function POST(request: NextRequest) {
       cover: cover || '',
     })
     
-    // Use createBlogPost directly for Postgres, or write to filesystem
-    let success = false
-    
-    if (isPostgresAvailable()) {
-      const post = {
-        slug,
-        title,
-        date: date || new Date().toISOString().split('T')[0],
-        tags: tags || [],
-        cover: cover || '',
-        content,
+    // Use Postgres - required on Vercel (filesystem is read-only)
+    if (!isPostgresAvailable()) {
+      if (process.env.VERCEL) {
+        return NextResponse.json(
+          { error: 'Postgres database is required on Vercel. Please configure POSTGRES_URL in your environment variables.' },
+          { status: 500 }
+        )
       }
-      success = await createBlogPost(post)
-    } else {
-      // Filesystem fallback
-      const contentDir = path.join(process.cwd(), 'content')
-      const blogDir = path.join(contentDir, 'blog')
-      if (!fs.existsSync(blogDir)) {
-        fs.mkdirSync(blogDir, { recursive: true })
+      // Filesystem fallback only for local development
+      try {
+        const contentDir = path.join(process.cwd(), 'content')
+        const blogDir = path.join(contentDir, 'blog')
+        if (!fs.existsSync(blogDir)) {
+          fs.mkdirSync(blogDir, { recursive: true })
+        }
+        const filePath = path.join(blogDir, `${slug}.md`)
+        fs.writeFileSync(filePath, frontmatter, 'utf8')
+        return NextResponse.json({ success: true, slug })
+      } catch (fsError: any) {
+        console.error('Filesystem write error:', fsError)
+        return NextResponse.json(
+          { error: 'Failed to create post. Filesystem is read-only. Please configure Postgres.' },
+          { status: 500 }
+        )
       }
-      const filePath = path.join(blogDir, `${slug}.md`)
-      fs.writeFileSync(filePath, frontmatter, 'utf8')
-      success = true
     }
+    
+    // Use Postgres
+    const post = {
+      slug,
+      title,
+      date: date || new Date().toISOString().split('T')[0],
+      tags: tags || [],
+      cover: cover || '',
+      content,
+    }
+    
+    const success = await createBlogPost(post)
     
     if (success) {
       return NextResponse.json({ success: true, slug })
     }
     
     return NextResponse.json(
-      { error: 'Failed to create post' },
+      { error: 'Failed to create post. The slug may already exist.' },
       { status: 500 }
     )
   } catch (error: any) {

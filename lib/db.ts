@@ -10,11 +10,13 @@ export function isPostgresAvailable(): boolean {
 // Initialize database tables (run once)
 export async function initDatabase() {
   if (!isPostgresAvailable()) {
-    console.warn('Postgres not available, skipping database initialization')
-    return false
+    const errorMsg = 'Postgres not available. Check POSTGRES_URL environment variable.'
+    console.warn('⚠️', errorMsg)
+    throw new Error(errorMsg)
   }
 
   try {
+    console.log('Creating content table...')
     // Create content table for JSON content (welcome, beliefs, explore, theme)
     await sql`
       CREATE TABLE IF NOT EXISTS content (
@@ -23,7 +25,9 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `
+    console.log('✅ Content table created')
 
+    console.log('Creating blog_posts table...')
     // Create blog_posts table
     await sql`
       CREATE TABLE IF NOT EXISTS blog_posts (
@@ -37,16 +41,21 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `
+    console.log('✅ Blog posts table created')
 
+    console.log('Creating indexes...')
     // Create indexes
     await sql`
       CREATE INDEX IF NOT EXISTS idx_blog_posts_date ON blog_posts(date DESC)
     `
+    console.log('✅ Indexes created')
 
     return true
-  } catch (error) {
-    console.error('Database initialization error:', error)
-    return false
+  } catch (error: any) {
+    const errorDetails = error?.message || String(error)
+    console.error('❌ Database initialization error:', errorDetails)
+    console.error('Full error:', error)
+    throw new Error(`Database initialization failed: ${errorDetails}`)
   }
 }
 

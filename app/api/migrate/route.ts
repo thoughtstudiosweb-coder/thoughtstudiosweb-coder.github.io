@@ -27,12 +27,19 @@ export async function POST() {
     }
     
     return NextResponse.json(
-      { error: result.message },
+      { 
+        error: result.message,
+        details: 'Check Vercel function logs for more information. Make sure POSTGRES_URL is set in environment variables.'
+      },
       { status: 500 }
     )
   } catch (error: any) {
+    console.error('Migration route error:', error)
     return NextResponse.json(
-      { error: error.message || 'Migration failed' },
+      { 
+        error: error.message || 'Migration failed',
+        details: 'Check Vercel function logs for more information.'
+      },
       { status: 500 }
     )
   }
