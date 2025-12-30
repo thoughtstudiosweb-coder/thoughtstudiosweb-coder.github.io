@@ -106,12 +106,16 @@ export async function getPageData(): Promise<PageData> {
     console.warn('⚠️ getPageData: Postgres not available, no blog posts will be shown')
   }
 
-  console.log(`📊 getPageData: Final data - Welcome: ${welcome ? 'yes' : 'no'}, Beliefs: ${beliefs.length}, Explore: ${explore.length}, BlogPosts: ${blogPosts.length}`)
+  // Ensure arrays are never null for logging and return
+  const beliefsArray = beliefs || []
+  const exploreArray = explore || []
+
+  console.log(`📊 getPageData: Final data - Welcome: ${welcome ? 'yes' : 'no'}, Beliefs: ${beliefsArray.length}, Explore: ${exploreArray.length}, BlogPosts: ${blogPosts.length}`)
 
   return {
     welcome: welcome || null,
-    beliefs: beliefs || [],
-    explore: explore || [],
+    beliefs: beliefsArray,
+    explore: exploreArray,
     blogPosts,
   }
 }
