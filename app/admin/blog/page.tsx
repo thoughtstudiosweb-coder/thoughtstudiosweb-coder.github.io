@@ -21,10 +21,23 @@ export default function BlogManager() {
   }, [])
 
   const fetchPosts = async () => {
-    const res = await fetch('/api/blog')
-    const data = await res.json()
-    setPosts(data)
-    setLoading(false)
+    try {
+      const res = await fetch('/api/blog')
+      if (!res.ok) {
+        console.error('Failed to fetch posts:', res.status, res.statusText)
+        setPosts([])
+        setLoading(false)
+        return
+      }
+      const data = await res.json()
+      console.log('Fetched posts:', data.length, 'posts')
+      setPosts(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error fetching posts:', error)
+      setPosts([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async (slug: string) => {

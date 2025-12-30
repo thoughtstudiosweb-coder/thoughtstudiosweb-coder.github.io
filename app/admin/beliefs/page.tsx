@@ -19,9 +19,19 @@ export default function BeliefsEditor() {
 
   useEffect(() => {
     fetch('/api/content/beliefs')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          console.error('Failed to load beliefs content:', res.status, res.statusText)
+          return []
+        }
+        return res.json()
+      })
       .then((data) => {
         setBeliefs(data || [])
+        setLoading(false)
+      })
+      .catch((error) => {
+        console.error('Error loading beliefs content:', error)
         setLoading(false)
       })
   }, [])
@@ -38,6 +48,8 @@ export default function BeliefsEditor() {
         body: JSON.stringify(beliefs),
       })
 
+      const data = await res.json()
+      
       if (res.ok) {
         setSaveSuccess(true)
         setMessage('Saved successfully!')
@@ -46,7 +58,9 @@ export default function BeliefsEditor() {
           setSaveSuccess(false)
         }, 3000)
       } else {
-        setMessage('Error saving')
+        const errorMsg = data.error || 'Error saving'
+        const hint = data.hint ? `\n\n${data.hint}` : ''
+        setMessage(`${errorMsg}${hint}`)
         setSaveSuccess(false)
       }
     } catch (error) {

@@ -116,13 +116,18 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const result = await sql`
       SELECT slug, title, date, tags, cover, content
       FROM blog_posts
-      ORDER BY date DESC
+      ORDER BY date DESC, created_at DESC
     `
     return result.rows.map(row => ({
       slug: row.slug,
       title: row.title,
-      date: row.date,
-      tags: row.tags || [],
+      // Ensure date is formatted as YYYY-MM-DD string
+      date: row.date instanceof Date 
+        ? row.date.toISOString().split('T')[0]
+        : typeof row.date === 'string'
+        ? row.date.split('T')[0] // Handle ISO string dates
+        : String(row.date),
+      tags: Array.isArray(row.tags) ? row.tags : [],
       cover: row.cover || '',
       content: row.content,
     }))

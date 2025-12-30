@@ -56,7 +56,9 @@ export default function NewBlogPost() {
       const data = await res.json()
       
       if (res.ok) {
+        // Force a hard refresh to ensure the new post appears
         router.push('/admin/blog')
+        router.refresh()
       } else {
         setMessage(data.error || 'Error creating post')
       }
