@@ -8,8 +8,10 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // Add a delay to ensure fresh data from Postgres (same as getPageData)
-  await new Promise(resolve => setTimeout(resolve, 500))
+  // CRITICAL: Increase delay to ensure connection pooling has fully synced
+  // This is especially important when CMS refreshes after a save/delete operation
+  // The delay must be long enough for the write connection to propagate to read connections
+  await new Promise(resolve => setTimeout(resolve, 1000))
   
   // Try Postgres first (more efficient)
   if (isPostgresAvailable()) {

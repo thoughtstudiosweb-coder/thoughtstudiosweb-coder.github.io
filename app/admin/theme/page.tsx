@@ -66,10 +66,15 @@ export default function ThemeEditor() {
   const fetchTheme = async () => {
     try {
       // Add cache-busting timestamp and no-cache option
-      const res = await fetch(`/api/content/theme?t=${Date.now()}`, {
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now()
+      const random = Math.random()
+      const res = await fetch(`/api/content/theme?t=${timestamp}&r=${random}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       })
       
@@ -98,7 +103,12 @@ export default function ThemeEditor() {
   }
 
   useEffect(() => {
-    fetchTheme()
+    // Add delay on initial load to ensure connection pooling has synced
+    // This is especially important after page refresh
+    const timer = setTimeout(() => {
+      fetchTheme()
+    }, 500)
+    return () => clearTimeout(timer)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

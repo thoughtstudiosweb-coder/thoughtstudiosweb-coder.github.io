@@ -8,9 +8,10 @@ export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    // Add delay to ensure fresh data from Postgres (matches getContent delay)
-    // readJSON calls getContent which has 500ms delay, but we add extra here for safety
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // CRITICAL: Increase delay to ensure connection pooling has fully synced
+    // This is especially important when CMS refreshes after a save operation
+    // The delay must be long enough for the write connection to propagate to read connections
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
     const beliefs = await readJSON('beliefs.json')
     console.log(`📤 API /beliefs: Returning ${Array.isArray(beliefs) ? beliefs.length : 0} beliefs`)

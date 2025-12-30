@@ -17,16 +17,25 @@ export default function BlogManager() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchPosts()
+    // Add delay on initial load to ensure connection pooling has synced
+    // This is especially important after page refresh
+    const timer = setTimeout(() => {
+      fetchPosts()
+    }, 500)
+    return () => clearTimeout(timer)
   }, [])
 
   const fetchPosts = async () => {
     try {
-      // Add cache-busting timestamp and no-cache option
-      const res = await fetch(`/api/blog?t=${Date.now()}`, {
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now()
+      const random = Math.random()
+      const res = await fetch(`/api/blog?t=${timestamp}&r=${random}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       })
       if (!res.ok) {

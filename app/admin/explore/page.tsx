@@ -20,10 +20,15 @@ export default function ExploreEditor() {
   const fetchExplore = async () => {
     try {
       // Add cache-busting timestamp and no-cache option
-      const res = await fetch(`/api/content/explore?t=${Date.now()}`, {
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now()
+      const random = Math.random()
+      const res = await fetch(`/api/content/explore?t=${timestamp}&r=${random}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       })
       if (!res.ok) {
@@ -47,7 +52,12 @@ export default function ExploreEditor() {
   }
 
   useEffect(() => {
-    fetchExplore()
+    // Add delay on initial load to ensure connection pooling has synced
+    // This is especially important after page refresh
+    const timer = setTimeout(() => {
+      fetchExplore()
+    }, 500)
+    return () => clearTimeout(timer)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
