@@ -150,9 +150,12 @@ export async function writeMarkdownFile(slug: string, content: string): Promise<
     // Check if post exists
     const existing = await getBlogPost(slug)
     if (existing) {
+      // updateBlogPost returns boolean
       return await updateBlogPost(slug, post)
     } else {
-      return await createBlogPost(post)
+      // createBlogPost returns { success: boolean; error?: string }
+      const createResult = await createBlogPost(post)
+      return createResult.success
     }
   }
 

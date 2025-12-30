@@ -36,7 +36,52 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Try Vercel Blob Storage first (if available)
+    // On Vercel, require Blob Storage (filesystem is read-only)
+    if (process.env.VERCEL) {
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+      if (!blobToken) {
+        return NextResponse.json(
+          { 
+            error: 'Vercel Blob Storage is required for file uploads on Vercel.',
+            hint: 'Go to Vercel Dashboard → Your Project → Storage → Create Database → Select "Blob". This will automatically add BLOB_READ_WRITE_TOKEN to your environment variables.'
+          },
+          { status: 500 }
+        )
+      }
+
+      try {
+        const { put } = await import('@vercel/blob')
+        
+        const timestamp = Date.now()
+        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+        const filename = `uploads/${timestamp}_${sanitizedName}`
+        
+        const blob = await put(filename, file, {
+          access: 'public',
+          token: blobToken,
+          contentType: file.type,
+        })
+
+        console.log(`✅ Image uploaded to Blob Storage: ${blob.url}`)
+        return NextResponse.json({ 
+          url: blob.url, 
+          filename: filename,
+          source: 'blob' 
+        })
+      } catch (blobError: any) {
+        console.error('❌ Blob storage error:', blobError)
+        const errorMsg = blobError?.message || String(blobError)
+        return NextResponse.json(
+          { 
+            error: `Failed to upload to Blob Storage: ${errorMsg}`,
+            hint: 'Check that BLOB_READ_WRITE_TOKEN is correct in your environment variables.'
+          },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Local development: Try Blob Storage first (if available), then fallback to filesystem
     const blobToken = process.env.BLOB_READ_WRITE_TOKEN
     if (blobToken) {
       try {
@@ -58,29 +103,15 @@ export async function POST(request: NextRequest) {
           source: 'blob' 
         })
       } catch (blobError) {
-        console.error('Blob storage error:', blobError)
+        console.warn('Blob storage not available, falling back to filesystem:', blobError)
         // Fall through to filesystem fallback
       }
     }
 
-    // Fallback to filesystem (for local development)
+    // Filesystem fallback (local development only)
     const uploadsDir = join(process.cwd(), 'public', 'uploads')
     if (!existsSync(uploadsDir)) {
-      try {
-        await mkdir(uploadsDir, { recursive: true })
-      } catch (error) {
-        // On Vercel without Blob Storage, this will fail
-        if (process.env.VERCEL) {
-          return NextResponse.json(
-            { 
-              error: 'File uploads require Vercel Blob Storage on Vercel. Please set up Blob Storage in your Vercel project.',
-              hint: 'Go to Vercel Dashboard → Storage → Create Blob'
-            },
-            { status: 500 }
-          )
-        }
-        throw error
-      }
+      await mkdir(uploadsDir, { recursive: true })
     }
 
     // Generate unique filename
@@ -101,10 +132,16 @@ export async function POST(request: NextRequest) {
       filename,
       source: 'filesystem' 
     })
-  } catch (error) {
-    console.error('Upload error:', error)
+  } catch (error: any) {
+    console.error('❌ Upload error:', error)
+    const errorMsg = error?.message || String(error)
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { 
+        error: `Failed to upload file: ${errorMsg}`,
+        hint: process.env.VERCEL 
+          ? 'Ensure Vercel Blob Storage is set up and BLOB_READ_WRITE_TOKEN is configured.'
+          : 'Check file permissions and disk space.'
+      },
       { status: 500 }
     )
   }

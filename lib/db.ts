@@ -161,17 +161,18 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
-export async function createBlogPost(post: BlogPost): Promise<boolean> {
+export async function createBlogPost(post: BlogPost): Promise<{ success: boolean; error?: string }> {
   if (!isPostgresAvailable()) {
-    return false
+    return { success: false, error: 'Postgres is not available' }
   }
 
   try {
     // Check if post already exists
     const existing = await getBlogPost(post.slug)
     if (existing) {
-      console.error(`Blog post with slug ${post.slug} already exists`)
-      return false
+      const errorMsg = `Blog post with slug "${post.slug}" already exists`
+      console.error(errorMsg)
+      return { success: false, error: errorMsg }
     }
 
     await sql`
@@ -185,15 +186,20 @@ export async function createBlogPost(post: BlogPost): Promise<boolean> {
         ${post.content}
       )
     `
-    return true
+    console.log(`✅ Blog post "${post.slug}" created successfully`)
+    return { success: true }
   } catch (error: any) {
     // Handle unique constraint violation
     if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
-      console.error(`Blog post with slug ${post.slug} already exists (unique constraint)`)
-      return false
+      const errorMsg = `Blog post with slug "${post.slug}" already exists (unique constraint)`
+      console.error(errorMsg, error)
+      return { success: false, error: errorMsg }
     }
-    console.error(`Error creating blog post ${post.slug}:`, error)
-    return false
+    
+    // Handle other SQL errors
+    const errorMsg = error.message || `Error creating blog post: ${String(error)}`
+    console.error(`❌ Error creating blog post ${post.slug}:`, error)
+    return { success: false, error: errorMsg }
   }
 }
 

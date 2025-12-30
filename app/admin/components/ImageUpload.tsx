@@ -54,7 +54,9 @@ export default function ImageUpload({ value, onChange, label = 'Image', required
         onChange(data.url)
         setPreview(data.url)
       } else {
-        alert(data.error || 'Upload failed')
+        const errorMsg = data.error || 'Upload failed'
+        const hint = data.hint ? `\n\n${data.hint}` : ''
+        alert(`${errorMsg}${hint}`)
         setPreview(null)
       }
     } catch (error) {
@@ -115,7 +117,9 @@ export default function ImageUpload({ value, onChange, label = 'Image', required
         onChange(data.url)
         setPreview(data.url)
       } else {
-        alert(data.error || 'Upload failed')
+        const errorMsg = data.error || 'Upload failed'
+        const hint = data.hint ? `\n\n${data.hint}` : ''
+        alert(`${errorMsg}${hint}`)
         setPreview(null)
       }
     } catch (error) {

@@ -85,15 +85,17 @@ export async function POST(request: NextRequest) {
       content,
     }
     
-    const success = await createBlogPost(post)
+    const result = await createBlogPost(post)
     
-    if (success) {
+    if (result.success) {
       return NextResponse.json({ success: true, slug })
     }
     
+    // Return specific error message
+    const errorMessage = result.error || 'Failed to create post'
     return NextResponse.json(
-      { error: 'Failed to create post. The slug may already exist.' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: errorMessage.includes('already exists') ? 409 : 500 }
     )
   } catch (error: any) {
     console.error('Create blog post error:', error)
