@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ThemeProvider from './components/ThemeProvider'
+
+// Force dynamic rendering to ensure theme is always fresh
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Thought Studios™',
@@ -16,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <ThemeProvider />
+        {children}
+      </body>
     </html>
   )
 }

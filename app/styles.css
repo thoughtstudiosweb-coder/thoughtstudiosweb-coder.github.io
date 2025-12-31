@@ -6,45 +6,49 @@
 }
 
 :root {
-    /* Dark Mode (Default) */
+    /* Dark Mode (Default) - Theme colors are now loaded dynamically from database */
+    /* Fallback values only - will be overridden by ThemeProvider */
     --bg-dark: #000000;
     --bg-card: #1a1a1a;
     --bg-card-hover: #1f1f1f;
     --text-white: #ffffff;
     --text-gray: #e0e0e0;
-    --accent-green: #00FF88;
-    --accent-teal: #00D4AA;
-    --accent-blue: #C19A6B;
     --accent-rose-gold: #C19A6B;
     --accent-rose-gold-light: #D4A574;
     --accent-rose-gold-dark: #B8860B;
-    --accent-rose-gold-metallic: linear-gradient(135deg, #D4A574 0%, #C19A6B 50%, #B8860B 100%);
-    --gradient-blue-green: linear-gradient(135deg, #00B8FF 0%, #00D4AA 50%, #00FF88 100%);
     --border-color: rgba(255, 255, 255, 0.1);
     --header-bg: rgba(0, 0, 0, 0.98);
     --footer-bg: rgba(0, 0, 0, 0.5);
     --shadow-color: rgba(0, 0, 0, 0.5);
+    /* Additional colors not in theme editor */
+    --accent-green: #00FF88;
+    --accent-teal: #00D4AA;
+    --accent-blue: #C19A6B;
+    --accent-rose-gold-metallic: linear-gradient(135deg, #D4A574 0%, #C19A6B 50%, #B8860B 100%);
+    --gradient-blue-green: linear-gradient(135deg, #00B8FF 0%, #00D4AA 50%, #00FF88 100%);
 }
 
 [data-theme="light"] {
-    /* Light Mode */
+    /* Light Mode - Theme colors are now loaded dynamically from database */
+    /* Fallback values only - will be overridden by ThemeProvider */
     --bg-dark: #ffffff;
     --bg-card: #f5f5f5;
     --bg-card-hover: #eeeeee;
     --text-white: #000000;
     --text-gray: #4a4a4a;
-    --accent-green: #00C870;
-    --accent-teal: #00B89A;
-    --accent-blue: #B8860B;
     --accent-rose-gold: #B8860B;
     --accent-rose-gold-light: #C19A6B;
     --accent-rose-gold-dark: #8B6914;
-    --accent-rose-gold-metallic: linear-gradient(135deg, #C19A6B 0%, #B8860B 50%, #8B6914 100%);
-    --gradient-blue-green: linear-gradient(135deg, #0099CC 0%, #00B89A 50%, #00C870 100%);
     --border-color: rgba(0, 0, 0, 0.1);
     --header-bg: rgba(255, 255, 255, 0.98);
     --footer-bg: rgba(255, 255, 255, 0.8);
     --shadow-color: rgba(0, 0, 0, 0.1);
+    /* Additional colors not in theme editor */
+    --accent-green: #00C870;
+    --accent-teal: #00B89A;
+    --accent-blue: #B8860B;
+    --accent-rose-gold-metallic: linear-gradient(135deg, #C19A6B 0%, #B8860B 50%, #8B6914 100%);
+    --gradient-blue-green: linear-gradient(135deg, #0099CC 0%, #00B89A 50%, #00C870 100%);
 }
 
 html {

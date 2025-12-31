@@ -94,7 +94,13 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
 
   // Sync with server props when they change (after router.refresh())
   useEffect(() => {
-    setTheme(initialData || DEFAULT_THEME)
+    if (initialData) {
+      console.log('🔄 ThemeEditor: Updating theme from server data', initialData)
+      setTheme(initialData)
+    } else {
+      console.log('⚠️ ThemeEditor: No initial data, using default theme')
+      setTheme(DEFAULT_THEME)
+    }
   }, [initialData])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -117,14 +123,45 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
       await saveTheme(theme)
       setSaveSuccess(true)
       setMessage('Saved successfully! Refreshing...')
+      
+      // Wait for database write to propagate (connection pooling delay)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Refresh the page to get updated data
       router.refresh()
-      setTimeout(() => {
+      
+      // Update local state after a delay to ensure fresh data is loaded
+      setTimeout(async () => {
+        try {
+          // Force a refetch with aggressive cache-busting
+          const response = await fetch(`/api/content/theme?t=${Date.now()}&r=${Math.random()}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+            },
+          })
+          if (response.ok) {
+            const updatedTheme = await response.json()
+            if (updatedTheme) {
+              console.log('✅ ThemeEditor: Fetched updated theme from API', updatedTheme)
+              setTheme(updatedTheme)
+            } else {
+              console.log('⚠️ ThemeEditor: API returned null/empty theme')
+            }
+          } else {
+            console.error('❌ ThemeEditor: Failed to fetch updated theme', response.status)
+          }
+        } catch (error) {
+          console.error('❌ ThemeEditor: Error fetching updated theme', error)
+        }
         setMessage('Saved successfully!')
         setTimeout(() => {
           setMessage('')
           setSaveSuccess(false)
         }, 2000)
-      }, 500)
+      }, 1500)
     } catch (error: any) {
       setMessage(error.message || 'Error saving')
       setSaveSuccess(false)
@@ -170,7 +207,26 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
         <h1 className="text-3xl font-bold text-white">Theme Editor</h1>
         <div className="flex gap-2">
           <button
-            onClick={() => router.refresh()}
+            onClick={async () => {
+              // Force refresh with cache-busting
+              const response = await fetch(`/api/content/theme?t=${Date.now()}&r=${Math.random()}`, {
+                cache: 'no-store',
+                headers: {
+                  'Cache-Control': 'no-cache, no-store, must-revalidate',
+                  'Pragma': 'no-cache',
+                  'Expires': '0',
+                },
+              })
+              if (response.ok) {
+                const updatedTheme = await response.json()
+                if (updatedTheme) {
+                  setTheme(updatedTheme)
+                  setMessage('Data refreshed!')
+                  setTimeout(() => setMessage(''), 2000)
+                }
+              }
+              router.refresh()
+            }}
             className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
             title="Refresh data from server"
           >
