@@ -31,25 +31,9 @@ export default function Hero({ data }: HeroProps) {
   const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const ctaLink = data.ctaLink || '/explore'
     
-    // If we're on homepage and link is to explore section, scroll instead of navigate
-    if (pathname === '/' && (ctaLink === '/explore' || ctaLink === '#explore')) {
-      e.preventDefault()
-      const exploreSection = document.getElementById('explore')
-      if (exploreSection) {
-        const headerHeight = 100
-        const elementPosition = exploreSection.getBoundingClientRect().top + window.pageYOffset
-        const offsetPosition = elementPosition - headerHeight
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        })
-      }
-    } else if (ctaLink.startsWith('/')) {
-      // For navigation to other pages, preserve scroll and set target section
-      const currentScroll = window.scrollY
-      if (currentScroll > 0) {
-        sessionStorage.setItem('preserveScroll', currentScroll.toString())
-      }
+    // Always navigate to routes for consistency with Header navigation
+    // This ensures URL changes and consistent behavior across the site
+    if (ctaLink.startsWith('/')) {
       // Store target section if it's a section link
       const sectionMap: Record<string, string> = {
         '/explore': 'explore',
@@ -60,8 +44,12 @@ export default function Hero({ data }: HeroProps) {
       const sectionId = sectionMap[ctaLink]
       if (sectionId) {
         sessionStorage.setItem('targetSection', sectionId)
+        // Clear preserveScroll to ensure we scroll to the section
+        sessionStorage.removeItem('preserveScroll')
       }
     }
+    // Let the Link component handle navigation naturally
+    // ScrollToSection will handle scrolling to the target section
   }
 
   return (

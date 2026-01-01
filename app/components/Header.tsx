@@ -53,29 +53,15 @@ export default function Header({ logo }: HeaderProps) {
     e.preventDefault()
     setMenuOpen(false)
 
-    // If we're on the homepage, scroll to section smoothly without navigation
-    if (pathname === '/') {
-      const element = document.getElementById(sectionId)
-      if (element) {
-        const headerHeight = 100 // Reduced offset for better centering
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-        const offsetPosition = elementPosition - headerHeight
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        })
-      }
-    } else {
-      // If we're on a different page (including blog posts), navigate to the target page
-      // Store the target section ID for ScrollToSection to handle
-      sessionStorage.setItem('targetSection', sectionId)
-      // Clear preserveScroll to ensure we scroll to the section, not preserve position
-      sessionStorage.removeItem('preserveScroll')
-      
-      // Navigate to the target page - ScrollToSection will handle scrolling to the section
-      router.push(href, { scroll: false })
-    }
+    // Always navigate to sub-routes for consistency
+    // This ensures URL changes, better for sharing/bookmarking, and consistent behavior
+    // Store the target section ID for ScrollToSection to handle scrolling
+    sessionStorage.setItem('targetSection', sectionId)
+    // Clear preserveScroll to ensure we scroll to the section, not preserve position
+    sessionStorage.removeItem('preserveScroll')
+    
+    // Navigate to the target page - ScrollToSection will handle scrolling to the section
+    router.push(href, { scroll: false })
   }
 
   return (
@@ -112,6 +98,7 @@ export default function Header({ logo }: HeaderProps) {
               href="/believe" 
               className={`nav-link ${activeSection === 'believe' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'believe', '/believe')}
+              prefetch={true}
             >
               What We Believe
             </Link>
@@ -119,6 +106,7 @@ export default function Header({ logo }: HeaderProps) {
               href="/explore" 
               className={`nav-link ${activeSection === 'explore' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'explore', '/explore')}
+              prefetch={true}
             >
               What We Explore
             </Link>
@@ -126,6 +114,7 @@ export default function Header({ logo }: HeaderProps) {
               href="/studio-notes" 
               className={`nav-link ${activeSection === 'studio-notes' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'studio-notes', '/studio-notes')}
+              prefetch={true}
             >
               Studio Notes
             </Link>
@@ -133,6 +122,7 @@ export default function Header({ logo }: HeaderProps) {
               href="/development" 
               className={`nav-link ${activeSection === 'development' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'development', '/development')}
+              prefetch={true}
             >
               In Development
             </Link>

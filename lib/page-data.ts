@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { readJSON } from '@/lib/content'
 import { getBlogPosts, isPostgresAvailable } from '@/lib/db'
 
@@ -33,8 +34,11 @@ export interface PageData {
 /**
  * Fetches all page data needed for the website pages.
  * This centralizes data fetching to avoid duplication across pages.
+ * 
+ * Uses React cache() to deduplicate requests within the same render cycle,
+ * improving performance when multiple components request the same data.
  */
-export async function getPageData(): Promise<PageData> {
+export const getPageData = cache(async (): Promise<PageData> => {
   console.log('🔄 getPageData: Starting parallel data fetch...')
   
   // Fetch all data in parallel for maximum performance
@@ -121,5 +125,5 @@ export async function getPageData(): Promise<PageData> {
     explore: exploreArray,
     blogPosts,
   }
-}
+})
 
