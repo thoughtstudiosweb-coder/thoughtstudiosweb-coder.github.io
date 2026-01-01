@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface HeroProps {
@@ -15,6 +15,7 @@ interface HeroProps {
 
 export default function Hero({ data }: HeroProps) {
   const pathname = usePathname()
+  const router = useRouter()
   
   if (!data) {
     console.warn('Hero: No data provided')
@@ -31,10 +32,8 @@ export default function Hero({ data }: HeroProps) {
   const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const ctaLink = data.ctaLink || '/explore'
     
-    // Always navigate to routes for consistency with Header navigation
-    // This ensures URL changes and consistent behavior across the site
     if (ctaLink.startsWith('/')) {
-      // Store target section if it's a section link
+      // Map route to section ID
       const sectionMap: Record<string, string> = {
         '/explore': 'explore',
         '/believe': 'believe',
@@ -42,14 +41,31 @@ export default function Hero({ data }: HeroProps) {
         '/development': 'development',
       }
       const sectionId = sectionMap[ctaLink]
+      
+      // If we're already on the target route, just scroll to the section
+      if (pathname === ctaLink && sectionId) {
+        e.preventDefault()
+        const element = document.getElementById(sectionId)
+        if (element) {
+          const headerHeight = 100
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+          const offsetPosition = elementPosition - headerHeight
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          })
+        }
+        return
+      }
+      
+      // If navigating to a different route, use navigation with scroll
       if (sectionId) {
+        e.preventDefault()
         sessionStorage.setItem('targetSection', sectionId)
-        // Clear preserveScroll to ensure we scroll to the section
         sessionStorage.removeItem('preserveScroll')
+        router.push(ctaLink, { scroll: false })
       }
     }
-    // Let the Link component handle navigation naturally
-    // ScrollToSection will handle scrolling to the target section
   }
 
   return (
