@@ -8,10 +8,11 @@ export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   // Small delay to handle connection pooling (Neon DB)
-  await new Promise(resolve => setTimeout(resolve, 200))
+  // Reduced to 50ms for better performance (same as other content routes)
+  await new Promise(resolve => setTimeout(resolve, 50))
   
   const logo = await readJSON('logo.json')
-  console.log(`📤 API /logo: Returning logo content`)
+  console.log(`📤 API /logo: Returning logo content ${logo ? '(exists)' : '(null)'}`)
   
   // Add no-cache headers to prevent browser caching
   return NextResponse.json(logo, {

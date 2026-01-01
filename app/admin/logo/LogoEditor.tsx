@@ -38,10 +38,10 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
       setSaveSuccess(true)
       setMessage('Saved successfully! Refreshing...')
       
-      // Wait for database write to propagate
+      // Wait for database write to propagate (connection pooling delay)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Fetch fresh data
+      // Fetch fresh data and dispatch events
       setTimeout(async () => {
         try {
           const response = await fetch(`/api/content/logo?t=${Date.now()}&r=${Math.random()}`, {
@@ -55,13 +55,36 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
           if (response.ok) {
             const updated = await response.json()
             if (updated) {
+              console.log('✅ LogoEditor: Fetched updated logo', updated)
               setConfig(updated)
+              
+              // Dispatch custom event to notify Logo components to refresh
+              // This works if CMS and site are in the same window/tab
+              console.log('📢 LogoEditor: Dispatching logo-updated event')
+              window.dispatchEvent(new Event('logo-updated'))
+              
+              // Also trigger refresh in other tabs/windows using BroadcastChannel
+              try {
+                const channel = new BroadcastChannel('logo-updates')
+                channel.postMessage({ 
+                  type: 'logo-updated', 
+                  timestamp: Date.now(),
+                  config: updated // Include config in message
+                })
+                // Keep channel open briefly to ensure message is sent
+                setTimeout(() => channel.close(), 100)
+              } catch (e) {
+                console.warn('⚠️ LogoEditor: BroadcastChannel not supported')
+              }
+              
+              // Force a second refresh after a bit more delay to ensure all instances update
+              setTimeout(() => {
+                window.dispatchEvent(new Event('logo-updated'))
+              }, 1000)
             }
           }
-          // Dispatch custom event to notify Logo components to refresh
-          window.dispatchEvent(new Event('logo-updated'))
         } catch (error) {
-          console.error('Error fetching updated logo:', error)
+          console.error('❌ LogoEditor: Error fetching updated logo:', error)
         }
         setMessage('Saved successfully!')
         setTimeout(() => {
