@@ -21,6 +21,7 @@ export default function AdminNav() {
     { href: '/admin/explore', label: 'Explore' },
     { href: '/admin/blog', label: 'Blog' },
     { href: '/admin/theme', label: 'Theme' },
+    { href: '/admin/logo', label: 'Logo' },
   ]
 
   return (

@@ -138,8 +138,8 @@ export default function ExploreEditor({ initialData }: ExploreEditorProps) {
               <ImageUpload
                 value={item.icon}
                 onChange={(url) => updateExplore(index, 'icon', url)}
-                label="Icon"
-                required={true}
+                label="Icon (Optional)"
+                required={false}
               />
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Logo from './Logo'
 
 export default function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
@@ -48,7 +49,7 @@ export default function Header() {
     <header className="header">
       <div className="container">
         <div className="header-content">
-          <Link href="/" className="logo">Thought Studios™</Link>
+          <Logo />
           <div className="header-actions">
             <button
               className="theme-toggle"

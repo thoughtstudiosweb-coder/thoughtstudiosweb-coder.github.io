@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createPost } from '../actions'
+import ImageUpload from '../../components/ImageUpload'
 
 export default function NewBlogPost() {
   const router = useRouter()
@@ -127,14 +128,11 @@ export default function NewBlogPost() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Cover Image URL
-          </label>
-          <input
-            type="text"
+          <ImageUpload
             value={cover}
-            onChange={(e) => setCover(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            onChange={setCover}
+            label="Cover Image"
+            required={false}
           />
         </div>
 

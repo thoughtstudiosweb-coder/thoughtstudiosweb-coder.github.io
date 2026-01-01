@@ -140,9 +140,20 @@ html.theme-transitioning * {
     text-decoration: none;
     letter-spacing: -0.5px;
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    display: block;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo:hover {
+    opacity: 0.8;
+}
+
+.logo:hover img {
     opacity: 0.8;
 }
 
@@ -697,6 +708,15 @@ html.theme-transitioning * {
 .service-card:hover .card-icon svg,
 .service-card:hover .card-icon-image {
     transform: scale(1.05);
+}
+
+/* Cards without icons - adjust spacing */
+.service-card.no-icon .card-content {
+    margin-top: 0;
+}
+
+.service-card.no-icon {
+    align-items: flex-start;
 }
 
 .card-content {

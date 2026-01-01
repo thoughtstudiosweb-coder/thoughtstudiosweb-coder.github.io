@@ -91,17 +91,8 @@ const DEFAULT_THEME: Theme = {
 export default function ThemeEditor({ initialData }: ThemeEditorProps) {
   const router = useRouter()
   const [theme, setTheme] = useState<Theme>(initialData || DEFAULT_THEME)
-
-  // Sync with server props when they change (after router.refresh())
-  useEffect(() => {
-    if (initialData) {
-      console.log('🔄 ThemeEditor: Updating theme from server data', initialData)
-      setTheme(initialData)
-    } else {
-      console.log('⚠️ ThemeEditor: No initial data, using default theme')
-      setTheme(DEFAULT_THEME)
-    }
-  }, [initialData])
+  const [isSaving, setIsSaving] = useState(false)
+  const [lastSavedTheme, setLastSavedTheme] = useState<Theme | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -112,61 +103,81 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
   } | null>(null)
   const [showExamples, setShowExamples] = useState(false)
 
+  // Sync with server props when they change (after router.refresh())
+  // But don't overwrite if we just saved (to prevent reverting user changes)
+  useEffect(() => {
+    // Only sync if we're not currently saving and the data is different from what we just saved
+    if (!isSaving) {
+      if (initialData) {
+        // Only update if it's different from what we just saved
+        if (!lastSavedTheme || JSON.stringify(initialData) !== JSON.stringify(lastSavedTheme)) {
+          console.log('🔄 ThemeEditor: Updating theme from server data', initialData)
+          setTheme(initialData)
+          setLastSavedTheme(null) // Reset after syncing
+        }
+      } else {
+        console.log('⚠️ ThemeEditor: No initial data, using default theme')
+        setTheme(DEFAULT_THEME)
+      }
+    }
+  }, [initialData, isSaving, lastSavedTheme])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!theme) return
 
     setSaving(true)
+    setIsSaving(true)
     setMessage('')
 
     try {
       await saveTheme(theme)
       setSaveSuccess(true)
-      setMessage('Saved successfully! Refreshing...')
+      setMessage('Saved successfully!')
+      
+      // Mark this theme as the last saved one to prevent reverting
+      setLastSavedTheme(JSON.parse(JSON.stringify(theme)))
       
       // Wait for database write to propagate (connection pooling delay)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Refresh the page to get updated data
-      router.refresh()
-      
-      // Update local state after a delay to ensure fresh data is loaded
-      setTimeout(async () => {
-        try {
-          // Force a refetch with aggressive cache-busting
-          const response = await fetch(`/api/content/theme?t=${Date.now()}&r=${Math.random()}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0',
-            },
-          })
-          if (response.ok) {
-            const updatedTheme = await response.json()
-            if (updatedTheme) {
-              console.log('✅ ThemeEditor: Fetched updated theme from API', updatedTheme)
+      // Fetch fresh data from API (don't use router.refresh to avoid race conditions)
+      try {
+        const response = await fetch(`/api/content/theme?t=${Date.now()}&r=${Math.random()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        })
+        if (response.ok) {
+          const updatedTheme = await response.json()
+          if (updatedTheme) {
+            console.log('✅ ThemeEditor: Fetched updated theme from API', updatedTheme)
+            // Only update if it matches what we saved (to prevent stale data from overwriting)
+            if (JSON.stringify(updatedTheme) === JSON.stringify(theme)) {
               setTheme(updatedTheme)
+              setLastSavedTheme(updatedTheme)
             } else {
-              console.log('⚠️ ThemeEditor: API returned null/empty theme')
+              console.log('⚠️ ThemeEditor: Fetched theme differs from saved, keeping current state')
             }
-          } else {
-            console.error('❌ ThemeEditor: Failed to fetch updated theme', response.status)
           }
-        } catch (error) {
-          console.error('❌ ThemeEditor: Error fetching updated theme', error)
         }
-        setMessage('Saved successfully!')
-        setTimeout(() => {
-          setMessage('')
-          setSaveSuccess(false)
-        }, 2000)
-      }, 1500)
+      } catch (error) {
+        console.error('❌ ThemeEditor: Error fetching updated theme', error)
+      }
+      
+      setTimeout(() => {
+        setMessage('')
+        setSaveSuccess(false)
+      }, 2000)
     } catch (error: any) {
       setMessage(error.message || 'Error saving')
       setSaveSuccess(false)
     } finally {
       setSaving(false)
+      setIsSaving(false)
     }
   }
 

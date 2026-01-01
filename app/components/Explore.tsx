@@ -22,16 +22,16 @@ export default function Explore({ data }: ExploreProps) {
         <h2 className="section-title">What We Explore</h2>
         <div className="cards-grid">
           {data.map((item, index) => (
-            <div key={index} className="card service-card">
-              <div className="card-icon">
-                {item.icon ? (
+            <div key={index} className={`card service-card ${!item.icon ? 'no-icon' : ''}`}>
+              {item.icon && (
+                <div className="card-icon">
                   <img
                     src={normalizeToHttps(item.icon)}
                     alt={item.title}
                     className="card-icon-image"
                   />
-                ) : null}
-              </div>
+                </div>
+              )}
               <div className="card-content">
                 <h3 className="card-title">{item.title}</h3>
                 <p className="card-description">{item.description}</p>
