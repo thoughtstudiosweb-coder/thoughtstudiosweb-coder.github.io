@@ -1,3 +1,5 @@
+import { normalizeToHttps } from '@/lib/url-utils'
+
 interface Belief {
   title: string
   description: string
@@ -20,7 +22,16 @@ export default function Beliefs({ data }: BeliefsProps) {
         <h2 className="section-title">What We Believe</h2>
         <div className="cards-grid">
           {data.map((belief, index) => (
-            <div key={index} className="card">
+            <div key={index} className={`card ${!belief.icon ? 'no-icon' : ''}`}>
+              {belief.icon && (
+                <div className="card-icon">
+                  <img
+                    src={normalizeToHttps(belief.icon)}
+                    alt={belief.title}
+                    className="card-icon-image"
+                  />
+                </div>
+              )}
               <div className="card-content">
                 <h3 className="card-title">{belief.title}</h3>
                 <p className="card-description">{belief.description}</p>

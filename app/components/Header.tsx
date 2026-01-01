@@ -67,14 +67,14 @@ export default function Header({ logo }: HeaderProps) {
         })
       }
     } else {
-      // If we're on a different page, navigate without scrolling to top
-      // Store the target section ID and current scroll position
-      const currentScroll = window.scrollY
+      // If we're on a different page (including blog posts), navigate to the target page
+      // Store the target section ID for ScrollToSection to handle
       sessionStorage.setItem('targetSection', sectionId)
-      sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      // Clear preserveScroll to ensure we scroll to the section, not preserve position
+      sessionStorage.removeItem('preserveScroll')
       
-      // Navigate without scrolling to top using scroll: false
-      router.push(href)
+      // Navigate to the target page - ScrollToSection will handle scrolling to the section
+      router.push(href, { scroll: false })
     }
   }
 
