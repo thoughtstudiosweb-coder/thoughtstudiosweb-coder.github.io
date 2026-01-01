@@ -70,7 +70,7 @@ export default function ScrollAnimations() {
     devOutro.forEach((outro) => observer.observe(outro))
 
     // Check for elements already visible on load - run multiple times to catch all elements
-    // This ensures studio-note-cards are visible even if they render after initial check
+    // This ensures all elements are visible even if they render after initial check
     const runChecks = () => {
       checkInitialView()
     }
@@ -78,10 +78,11 @@ export default function ScrollAnimations() {
     // Run immediately
     runChecks()
     
-    // Run after DOM settles
+    // Run after DOM settles - multiple checks to catch all elements
     setTimeout(runChecks, 50)
     setTimeout(runChecks, 150)
     setTimeout(runChecks, 300)
+    setTimeout(runChecks, 500) // Extra check for slower renders
     
     // Also run when DOM content is loaded
     if (typeof window !== 'undefined') {
@@ -89,6 +90,10 @@ export default function ScrollAnimations() {
         runChecks()
       } else {
         window.addEventListener('load', runChecks)
+        // Also listen for route changes in Next.js
+        window.addEventListener('popstate', () => {
+          setTimeout(runChecks, 100)
+        })
       }
     }
 

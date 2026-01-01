@@ -496,9 +496,17 @@ html.theme-transitioning * {
 }
 
 /* Enhanced luxury animation when scrolled into view */
+/* Sections are visible by default to prevent blank pages */
+.content-section {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animation enhancement - only apply subtle animation if not already animated */
 .content-section:not(.animate-in) {
-    opacity: 0;
-    transform: translateY(30px);
+    /* Start visible but with slight offset for smooth animation */
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .content-section.animate-in {
