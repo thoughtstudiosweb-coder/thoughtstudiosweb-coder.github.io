@@ -53,14 +53,14 @@
 
 html {
     scroll-behavior: smooth;
-    scroll-padding-top: 120px;
+    scroll-padding-top: 100px;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
 }
 
 @media (max-width: 768px) {
     html {
-        scroll-padding-top: 100px;
+        scroll-padding-top: 80px;
     }
 }
 
@@ -488,6 +488,7 @@ html.theme-transitioning * {
 .content-section {
     padding: 120px 0;
     scroll-margin-top: 100px;
+    scroll-padding-top: 100px;
     opacity: 1;
     transform: translateY(0);
     transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 interface HeaderProps {
   logo: React.ReactNode
@@ -14,6 +14,7 @@ export default function Header({ logo }: HeaderProps) {
   const [mounted, setMounted] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('')
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
@@ -46,6 +47,35 @@ export default function Header({ logo }: HeaderProps) {
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
     document.documentElement.setAttribute('data-theme', newTheme)
+  }
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string, href: string) => {
+    e.preventDefault()
+    setMenuOpen(false)
+
+    // If we're on the homepage, scroll to section smoothly without navigation
+    if (pathname === '/') {
+      const element = document.getElementById(sectionId)
+      if (element) {
+        const headerHeight = 100 // Reduced offset for better centering
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    } else {
+      // If we're on a different page, navigate smoothly
+      // Preserve current scroll position to prevent jump to top
+      const currentScroll = window.scrollY
+      if (currentScroll > 0) {
+        sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      }
+      // Use Next.js router for smooth navigation (preserves scroll better)
+      router.push(href)
+    }
   }
 
   return (
@@ -81,60 +111,28 @@ export default function Header({ logo }: HeaderProps) {
             <Link 
               href="/believe" 
               className={`nav-link ${activeSection === 'believe' ? 'active' : ''}`} 
-              onClick={(e) => {
-                setMenuOpen(false)
-                // Prevent default scroll behavior, let ScrollToSection handle it
-                const currentScroll = window.scrollY
-                if (currentScroll > 0) {
-                  // Preserve scroll position during navigation
-                  sessionStorage.setItem('preserveScroll', currentScroll.toString())
-                }
-              }}
+              onClick={(e) => handleNavClick(e, 'believe', '/believe')}
             >
               What We Believe
             </Link>
             <Link 
               href="/explore" 
               className={`nav-link ${activeSection === 'explore' ? 'active' : ''}`} 
-              onClick={(e) => {
-                setMenuOpen(false)
-                // Prevent default scroll behavior, let ScrollToSection handle it
-                const currentScroll = window.scrollY
-                if (currentScroll > 0) {
-                  // Preserve scroll position during navigation
-                  sessionStorage.setItem('preserveScroll', currentScroll.toString())
-                }
-              }}
+              onClick={(e) => handleNavClick(e, 'explore', '/explore')}
             >
               What We Explore
             </Link>
             <Link 
               href="/studio-notes" 
               className={`nav-link ${activeSection === 'studio-notes' ? 'active' : ''}`} 
-              onClick={(e) => {
-                setMenuOpen(false)
-                // Prevent default scroll behavior, let ScrollToSection handle it
-                const currentScroll = window.scrollY
-                if (currentScroll > 0) {
-                  // Preserve scroll position during navigation
-                  sessionStorage.setItem('preserveScroll', currentScroll.toString())
-                }
-              }}
+              onClick={(e) => handleNavClick(e, 'studio-notes', '/studio-notes')}
             >
               Studio Notes
             </Link>
             <Link 
               href="/development" 
               className={`nav-link ${activeSection === 'development' ? 'active' : ''}`} 
-              onClick={(e) => {
-                setMenuOpen(false)
-                // Prevent default scroll behavior, let ScrollToSection handle it
-                const currentScroll = window.scrollY
-                if (currentScroll > 0) {
-                  // Preserve scroll position during navigation
-                  sessionStorage.setItem('preserveScroll', currentScroll.toString())
-                }
-              }}
+              onClick={(e) => handleNavClick(e, 'development', '/development')}
             >
               In Development
             </Link>
