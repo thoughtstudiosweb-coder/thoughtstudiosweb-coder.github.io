@@ -67,13 +67,13 @@ export default function Header({ logo }: HeaderProps) {
         })
       }
     } else {
-      // If we're on a different page, navigate smoothly
-      // Preserve current scroll position to prevent jump to top
+      // If we're on a different page, navigate without scrolling to top
+      // Store the target section ID and current scroll position
       const currentScroll = window.scrollY
-      if (currentScroll > 0) {
-        sessionStorage.setItem('preserveScroll', currentScroll.toString())
-      }
-      // Use Next.js router for smooth navigation (preserves scroll better)
+      sessionStorage.setItem('targetSection', sectionId)
+      sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      
+      // Navigate without scrolling to top using scroll: false
       router.push(href)
     }
   }

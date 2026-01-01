@@ -11,28 +11,39 @@ export default function ScrollToSection({ sectionId }: ScrollToSectionProps) {
   const pathname = usePathname()
   const hasScrolled = useRef(false)
   const previousPathname = useRef(pathname)
+  const scrollPrevented = useRef(false)
 
-  // Prevent scroll-to-top on navigation by preserving scroll position
+  // CRITICAL: Prevent Next.js from scrolling to top on navigation
   useLayoutEffect(() => {
     if (pathname !== '/') {
+      // Check if we have a target section from navigation
+      const targetSection = sessionStorage.getItem('targetSection')
       const preservedScroll = sessionStorage.getItem('preserveScroll')
-      if (preservedScroll) {
-        const scrollPos = parseInt(preservedScroll, 10)
-        if (scrollPos > 0) {
-          // Restore scroll position synchronously before paint to prevent jump to top
-          window.scrollTo(0, scrollPos)
-          sessionStorage.removeItem('preserveScroll')
+      
+      if (targetSection === sectionId && !scrollPrevented.current) {
+        // Prevent Next.js default scroll-to-top behavior
+        // This must happen synchronously before Next.js scrolls
+        const preventScroll = () => {
+          if (preservedScroll) {
+            const scrollPos = parseInt(preservedScroll, 10)
+            if (scrollPos > 0) {
+              window.scrollTo(0, scrollPos)
+            }
+          }
         }
-      } else {
-        // If no preserved scroll, don't jump to top - stay at current position
-        // This allows smooth scrolling from current position
-        const currentScroll = window.scrollY
-        if (currentScroll > 0) {
-          window.scrollTo(0, currentScroll)
-        }
+        
+        // Immediately prevent scroll
+        preventScroll()
+        
+        // Also prevent scroll on next frame to catch any delayed scrolls
+        requestAnimationFrame(preventScroll)
+        
+        scrollPrevented.current = true
+        sessionStorage.removeItem('targetSection')
+        sessionStorage.removeItem('preserveScroll')
       }
     }
-  }, [pathname])
+  }, [pathname, sectionId])
 
   useEffect(() => {
     // Only scroll if we're on a route page (not the homepage)
@@ -44,7 +55,6 @@ export default function ScrollToSection({ sectionId }: ScrollToSectionProps) {
       const scrollToElement = () => {
         const element = document.getElementById(sectionId)
         if (element && !hasScrolled.current) {
-          // Reduced header offset for better centering (less space above section)
           const headerHeight = 100
           const rect = element.getBoundingClientRect()
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop
@@ -52,12 +62,12 @@ export default function ScrollToSection({ sectionId }: ScrollToSectionProps) {
           const offsetPosition = elementTop - headerHeight
           const currentScroll = window.scrollY
 
-          // Calculate if we need to scroll up or down
-          const scrollDirection = offsetPosition > currentScroll ? 'down' : 'up'
+          // Calculate scroll direction for smooth animation
+          const needsScroll = Math.abs(currentScroll - offsetPosition) > 10
           
-          // Always use smooth scroll to continue from current position
-          // This prevents the jump to top and creates smooth animation
-          if (Math.abs(currentScroll - offsetPosition) > 10) {
+          if (needsScroll) {
+            // Smooth scroll from current position to target
+            // This creates smooth animation without jumping to top first
             window.scrollTo({
               top: offsetPosition,
               behavior: 'smooth'
@@ -74,27 +84,38 @@ export default function ScrollToSection({ sectionId }: ScrollToSectionProps) {
       }
 
       // Wait for page to render, then scroll smoothly
-      // Use a small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        if (!scrollToElement()) {
-          // Retry if element not found yet
-          requestAnimationFrame(() => {
-            if (!scrollToElement()) {
-              setTimeout(scrollToElement, 100)
-            }
-          })
-        }
-      }, 100) // Slightly longer delay to ensure page has rendered
+      // Use requestAnimationFrame for immediate execution after render
+      let rafId1: number
+      let rafId2: number
+      let timeoutId: NodeJS.Timeout
+      
+      rafId1 = requestAnimationFrame(() => {
+        rafId2 = requestAnimationFrame(() => {
+          // Double RAF ensures DOM is ready
+          if (!scrollToElement()) {
+            // Retry if element not found yet
+            timeoutId = setTimeout(() => {
+              if (!scrollToElement()) {
+                setTimeout(scrollToElement, 50)
+              }
+            }, 50)
+          }
+        })
+      })
 
       return () => {
-        clearTimeout(timer)
+        cancelAnimationFrame(rafId1)
+        if (rafId2) cancelAnimationFrame(rafId2)
+        if (timeoutId) clearTimeout(timeoutId)
         hasScrolled.current = false
+        scrollPrevented.current = false
       }
     } else {
-      // Reset flag on homepage
+      // Reset flags on homepage
       hasScrolled.current = false
+      scrollPrevented.current = false
       previousPathname.current = pathname
-      sessionStorage.removeItem('preserveScroll')
+      sessionStorage.removeItem('targetSection')
     }
   }, [pathname, sectionId])
 
