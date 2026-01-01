@@ -17,13 +17,14 @@ export async function saveFavicon(config: FaviconConfig) {
   const success = await writeJSON('favicon.json', config)
   
   if (success) {
-    // Revalidate all pages to update favicon
+    // Revalidate layout to update favicon metadata
+    // Using 'layout' type ensures generateMetadata() is called again
     revalidatePath('/', 'layout')
-    revalidatePath('/believe')
-    revalidatePath('/explore')
-    revalidatePath('/studio-notes')
-    revalidatePath('/development')
-    revalidatePath('/blog')
+    revalidatePath('/believe', 'layout')
+    revalidatePath('/explore', 'layout')
+    revalidatePath('/studio-notes', 'layout')
+    revalidatePath('/development', 'layout')
+    revalidatePath('/blog', 'layout')
     revalidatePath('/admin/favicon')
     return { success: true }
   }

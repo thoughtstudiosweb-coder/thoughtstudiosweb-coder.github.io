@@ -36,18 +36,18 @@ export default function FaviconEditor({ initialData }: FaviconEditorProps) {
       setSaveSuccess(true)
       setMessage('Saved successfully! Refreshing...')
       
-      // Wait for database write to propagate
+      // Wait for database write to propagate (connection pooling delay)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Refresh to show updated favicon
+      // Refresh to trigger generateMetadata() which will update favicon server-side
+      // This follows the same Server Component pattern as the rest of the site
+      router.refresh()
+      
+      setMessage('Saved successfully!')
       setTimeout(() => {
-        router.refresh()
-        setMessage('Saved successfully!')
-        setTimeout(() => {
-          setMessage('')
-          setSaveSuccess(false)
-        }, 2000)
-      }, 1500)
+        setMessage('')
+        setSaveSuccess(false)
+      }, 2000)
     } catch (error: any) {
       setMessage(error.message || 'Error saving')
       setSaveSuccess(false)
