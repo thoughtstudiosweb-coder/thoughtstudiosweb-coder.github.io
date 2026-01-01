@@ -1360,6 +1360,12 @@ html.theme-transitioning * {
     font-weight: 600;
     margin-bottom: 12px;
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-logo img {
+    display: block;
 }
 
 .footer-tagline {

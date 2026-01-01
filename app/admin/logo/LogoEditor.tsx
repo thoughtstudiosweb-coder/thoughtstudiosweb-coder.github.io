@@ -58,6 +58,8 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
               setConfig(updated)
             }
           }
+          // Dispatch custom event to notify Logo components to refresh
+          window.dispatchEvent(new Event('logo-updated'))
         } catch (error) {
           console.error('Error fetching updated logo:', error)
         }

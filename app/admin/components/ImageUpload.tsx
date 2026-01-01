@@ -147,13 +147,30 @@ export default function ImageUpload({ value, onChange, label = 'Image', required
 
       {/* Preview */}
       {preview && (
-        <div className="mb-3">
+        <div className="mb-3 relative">
           <img
             src={preview}
             alt="Preview"
             className="max-w-full h-32 object-contain bg-gray-700 rounded border border-gray-600 p-2"
             onError={() => setPreview(null)}
           />
+          <button
+            type="button"
+            onClick={() => {
+              onChange('')
+              setPreview(null)
+              if (urlInputRef.current) {
+                urlInputRef.current.value = ''
+              }
+              if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+              }
+            }}
+            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 text-xs font-bold"
+            title="Remove image"
+          >
+            ✕
+          </button>
         </div>
       )}
 

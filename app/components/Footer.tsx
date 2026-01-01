@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from './Logo'
 
 export default function Footer() {
   return (
@@ -6,7 +7,7 @@ export default function Footer() {
       <div className="container">
         <div className="footer-content">
           <div className="footer-brand">
-            <div className="footer-logo">Thought Studios™</div>
+            <Logo className="footer-logo" showLink={true} />
             <p className="footer-tagline">A place to think clearly</p>
           </div>
           <nav className="footer-nav">
