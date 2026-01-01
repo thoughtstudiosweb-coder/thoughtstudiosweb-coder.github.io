@@ -41,6 +41,20 @@ export default function StudioNotes({ posts }: StudioNotesProps) {
       // Show all posts if 3 or fewer
       setDisplayedPosts(posts)
     }
+    
+    // Ensure cards are visible and trigger animation
+    // Use requestAnimationFrame to ensure DOM is updated
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const cards = document.querySelectorAll('.studio-note-card')
+        cards.forEach((card) => {
+          // Always add animate-in class to make cards visible
+          if (!card.classList.contains('animate-in')) {
+            card.classList.add('animate-in')
+          }
+        })
+      })
+    })
   }, [posts, currentPage])
 
   const handlePageChange = (page: number) => {

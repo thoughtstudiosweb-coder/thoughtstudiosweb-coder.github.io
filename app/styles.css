@@ -1014,12 +1014,14 @@ html.theme-transitioning * {
     cursor: pointer;
     text-decoration: none;
     color: inherit;
-    opacity: 0;
-    transform: translateY(30px) scale(0.98);
     position: relative;
     z-index: 1;
+    /* Always visible - cards should be visible by default */
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
+/* Animation enhancement when scrolled into view */
 .studio-note-card.animate-in {
     opacity: 1;
     transform: translateY(0) scale(1);

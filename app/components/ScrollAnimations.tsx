@@ -40,6 +40,8 @@ export default function ScrollAnimations() {
         const isVisible = rect.top < window.innerHeight && rect.bottom > 0
         if (isVisible) {
           el.classList.add('animate-in')
+          // Also unobserve since it's already visible
+          observer.unobserve(el)
         }
       })
     }
@@ -67,8 +69,28 @@ export default function ScrollAnimations() {
     devIntro.forEach((intro) => observer.observe(intro))
     devOutro.forEach((outro) => observer.observe(outro))
 
-    // Check for elements already visible on load
-    setTimeout(checkInitialView, 150)
+    // Check for elements already visible on load - run multiple times to catch all elements
+    // This ensures studio-note-cards are visible even if they render after initial check
+    const runChecks = () => {
+      checkInitialView()
+    }
+    
+    // Run immediately
+    runChecks()
+    
+    // Run after DOM settles
+    setTimeout(runChecks, 50)
+    setTimeout(runChecks, 150)
+    setTimeout(runChecks, 300)
+    
+    // Also run when DOM content is loaded
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'complete') {
+        runChecks()
+      } else {
+        window.addEventListener('load', runChecks)
+      }
+    }
 
     return () => {
       sections.forEach((section) => observer.unobserve(section))
