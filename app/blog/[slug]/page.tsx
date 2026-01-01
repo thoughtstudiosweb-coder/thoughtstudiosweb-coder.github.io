@@ -2,6 +2,7 @@ import { getBlogPost } from '@/lib/db'
 import { marked } from 'marked'
 import { notFound } from 'next/navigation'
 import Header from '@/app/components/Header'
+import LogoServer from '@/app/components/LogoServer'
 import Footer from '@/app/components/Footer'
 import BlogImage from '@/app/components/BlogImage'
 
@@ -24,9 +25,12 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
   const htmlContent = marked.parse(post.content || '')
 
+  // Fetch logo server-side (no API routes, no connection pooling delays)
+  const logo = <LogoServer />
+
   return (
     <>
-      <Header />
+      <Header logo={logo} />
       <main className="main">
         <div className="blog-post-detail">
           <div className="blog-post-header">

@@ -7,15 +7,19 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // Small delay to handle connection pooling (Neon DB)
-  // Reduced to 50ms for better performance (same as other content routes)
-  await new Promise(resolve => setTimeout(resolve, 50))
-  
+  // Note: This API route is kept for backward compatibility
+  // But the website now uses LogoServer component (server-side) which is faster
+  // No delays needed - direct database access
   const logo = await readJSON('logo.json')
-  console.log(`📤 API /logo: Returning logo content ${logo ? '(exists)' : '(null)'}`)
   
-  // Add no-cache headers to prevent browser caching
-  return NextResponse.json(logo, {
+  // Return default if null
+  const result = logo || {
+    type: 'text' as const,
+    text: 'Thought Studios™',
+    fontSize: 24,
+  }
+  
+  return NextResponse.json(result, {
     headers: {
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',

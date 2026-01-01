@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import Logo from './Logo'
 
-export default function Header() {
+interface HeaderProps {
+  logo: React.ReactNode
+}
+
+export default function Header({ logo }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -49,7 +52,7 @@ export default function Header() {
     <header className="header">
       <div className="container">
         <div className="header-content">
-          <Logo />
+          {logo}
           <div className="header-actions">
             <button
               className="theme-toggle"

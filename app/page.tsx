@@ -1,5 +1,6 @@
 import { getPageData } from '@/lib/page-data'
 import Header from './components/Header'
+import LogoServer from './components/LogoServer'
 import Hero from './components/Hero'
 import Beliefs from './components/Beliefs'
 import Explore from './components/Explore'
@@ -18,9 +19,12 @@ export default async function Home() {
   const { welcome, beliefs, explore, blogPosts } = await getPageData()
   console.log(`🏠 Home page: Received ${blogPosts.length} blog posts`)
 
+  // Fetch logo server-side (no API routes, no connection pooling delays)
+  const logo = <LogoServer />
+
   return (
     <>
-      <Header />
+      <Header logo={logo} />
       <ScrollAnimations />
       <main className="main">
         <Hero data={welcome} />

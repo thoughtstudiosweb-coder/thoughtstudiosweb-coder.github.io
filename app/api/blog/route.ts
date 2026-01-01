@@ -8,8 +8,9 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
-  // Small delay to handle connection pooling (Neon DB)
-  // Reduced to 200ms for better performance
+  // Note: This API route is only used by CMS for refreshing data after saves
+  // Website uses Server Components which fetch directly from database (no delays needed)
+  // Small delay here helps CMS refresh see latest data after writes
   await new Promise(resolve => setTimeout(resolve, 200))
   
   // Try Postgres first (more efficient)

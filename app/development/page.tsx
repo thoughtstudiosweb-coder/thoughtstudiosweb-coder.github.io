@@ -1,5 +1,6 @@
 import { getPageData } from '@/lib/page-data'
 import Header from '../components/Header'
+import LogoServer from '../components/LogoServer'
 import Hero from '../components/Hero'
 import Beliefs from '../components/Beliefs'
 import Explore from '../components/Explore'
@@ -16,9 +17,12 @@ export default async function DevelopmentPage() {
   // Fetch all page data using centralized function
   const { welcome, beliefs, explore, blogPosts } = await getPageData()
 
+  // Fetch logo server-side (no API routes, no connection pooling delays)
+  const logo = <LogoServer />
+
   return (
     <>
-      <Header />
+      <Header logo={logo} />
       <ScrollToSection sectionId="development" />
       <main className="main">
         <Hero data={welcome || { title: '', subtitle: '', ctaText: '', ctaLink: '', image: '' }} />

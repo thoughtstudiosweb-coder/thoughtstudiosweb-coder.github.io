@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
     
     if (result.success) {
       console.log(`✅ Blog post "${slug}" created successfully`)
-      // Add delay to ensure creation is visible in connection pool
+      // Note: Delay helps CMS refresh see the new post immediately after creation
+      // Website uses Server Components which don't need these delays
       await new Promise(resolve => setTimeout(resolve, 500))
       
       return NextResponse.json(

@@ -14,7 +14,9 @@ export async function GET(
     const slug = params.slug
     console.log(`🔍 Fetching blog post: ${slug}`)
     
-    // Add delay to ensure fresh data from Postgres
+    // Note: This API route is only used by CMS for refreshing data after saves
+    // Website uses Server Components which fetch directly from database (no delays needed)
+    // Small delay here helps CMS refresh see latest data after writes
     await new Promise(resolve => setTimeout(resolve, 500))
     
     const content = await readMarkdownFile(slug)

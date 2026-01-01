@@ -24,7 +24,8 @@ export async function DELETE(
     
     if (success) {
       console.log(`✅ Blog post "${slug}" deleted successfully`)
-      // Add delay to ensure deletion is visible in connection pool
+      // Note: Delay helps CMS refresh see the deletion immediately after delete
+      // Website uses Server Components which don't need these delays
       await new Promise(resolve => setTimeout(resolve, 500))
       
       return NextResponse.json(

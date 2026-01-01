@@ -29,6 +29,8 @@ export async function readJSON<T>(fileName: string): Promise<T | null> {
     const key = fileName.replace('.json', '') // Remove .json extension for key
     console.log(`🔍 Attempting to read ${fileName} from Postgres (key: ${key})...`)
     
+    // No delays needed - we're using Server Components now, not API routes
+    // Direct database access doesn't have connection pooling delays
     const content = await getContent(key)
     if (content !== null) {
       console.log(`✅ SUCCESS: Read ${fileName} from Postgres (key: ${key})`)

@@ -68,11 +68,8 @@ export async function getContent(key: string): Promise<any | null> {
   }
 
   try {
-    // Minimal delay for connection pooling (Neon DB)
-    // Reduced to 50ms - sufficient for most reads, especially on website pages
-    // Only needed for eventual consistency in connection pool
-    await new Promise(resolve => setTimeout(resolve, 50))
-    
+    // No delays needed - Server Components with direct database access
+    // don't have connection pooling issues
     console.log(`🔍 Querying content table for key: ${key}`)
     const result = await sql`
       SELECT value, updated_at FROM content WHERE key = ${key}
@@ -145,11 +142,8 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
   try {
     console.log('🔍 Querying blog_posts table...')
-    // Minimal delay for connection pooling (Neon DB)
-    // Reduced to 50ms - sufficient for most reads, especially on website pages
-    // Only needed for eventual consistency in connection pool
-    await new Promise(resolve => setTimeout(resolve, 50))
-    
+    // No delays needed - Server Components with direct database access
+    // don't have connection pooling issues
     const result = await sql`
       SELECT slug, title, date, tags, cover, content, created_at
       FROM blog_posts
@@ -205,10 +199,8 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 
   try {
-    // Add a small delay to handle connection pooling (Neon DB)
-    // This helps ensure we're reading from the same connection pool
-    await new Promise(resolve => setTimeout(resolve, 50))
-    
+    // No delays needed - Server Components with direct database access
+    // don't have connection pooling issues
     const result = await sql`
       SELECT slug, title, date, tags, cover, content
       FROM blog_posts
