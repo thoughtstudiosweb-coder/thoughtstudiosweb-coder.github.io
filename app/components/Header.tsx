@@ -6,9 +6,15 @@ import { usePathname, useRouter } from 'next/navigation'
 
 interface HeaderProps {
   logo: React.ReactNode
+  navigation: {
+    believe: string
+    explore: string
+    studioNotes: string
+    development: string
+  }
 }
 
-export default function Header({ logo }: HeaderProps) {
+export default function Header({ logo, navigation }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -112,29 +118,33 @@ export default function Header({ logo }: HeaderProps) {
               href="/believe" 
               className={`nav-link ${activeSection === 'believe' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'believe', '/believe')}
+              prefetch={true}
             >
-              What We Believe
+              {navigation.believe}
             </Link>
             <Link 
               href="/explore" 
               className={`nav-link ${activeSection === 'explore' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'explore', '/explore')}
+              prefetch={true}
             >
-              What We Explore
+              {navigation.explore}
             </Link>
             <Link 
               href="/studio-notes" 
               className={`nav-link ${activeSection === 'studio-notes' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'studio-notes', '/studio-notes')}
+              prefetch={true}
             >
-              Studio Notes
+              {navigation.studioNotes}
             </Link>
             <Link 
               href="/development" 
               className={`nav-link ${activeSection === 'development' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'development', '/development')}
+              prefetch={true}
             >
-              In Development
+              {navigation.development}
             </Link>
           </nav>
         </div>

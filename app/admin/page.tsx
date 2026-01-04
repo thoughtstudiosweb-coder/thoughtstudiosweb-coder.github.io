@@ -45,6 +45,14 @@ export default function AdminDashboard() {
           <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">Theme Colors</h2>
           <p className="text-sm sm:text-base text-gray-400">Customize light & dark mode colors</p>
         </Link>
+
+        <Link
+          href="/admin/site-content"
+          className="block p-4 sm:p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">Site Content</h2>
+          <p className="text-sm sm:text-base text-gray-400">Edit navigation labels, section headers, and footer content</p>
+        </Link>
       </div>
     </div>
   )
