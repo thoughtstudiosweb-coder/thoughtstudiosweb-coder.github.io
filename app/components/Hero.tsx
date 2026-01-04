@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 interface HeroProps {
@@ -15,7 +15,6 @@ interface HeroProps {
 
 export default function Hero({ data }: HeroProps) {
   const pathname = usePathname()
-  const router = useRouter()
   
   if (!data) {
     console.warn('Hero: No data provided')
@@ -32,8 +31,26 @@ export default function Hero({ data }: HeroProps) {
   const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const ctaLink = data.ctaLink || '/explore'
     
-    if (ctaLink.startsWith('/')) {
-      // Map route to section ID
+    // If we're on homepage and link is to explore section, scroll instead of navigate
+    if (pathname === '/' && (ctaLink === '/explore' || ctaLink === '#explore')) {
+      e.preventDefault()
+      const exploreSection = document.getElementById('explore')
+      if (exploreSection) {
+        const headerHeight = 100
+        const elementPosition = exploreSection.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    } else if (ctaLink.startsWith('/')) {
+      // For navigation to other pages, preserve scroll and set target section
+      const currentScroll = window.scrollY
+      if (currentScroll > 0) {
+        sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      }
+      // Store target section if it's a section link
       const sectionMap: Record<string, string> = {
         '/explore': 'explore',
         '/believe': 'believe',
@@ -41,29 +58,8 @@ export default function Hero({ data }: HeroProps) {
         '/development': 'development',
       }
       const sectionId = sectionMap[ctaLink]
-      
-      // If we're already on the target route, just scroll to the section
-      if (pathname === ctaLink && sectionId) {
-        e.preventDefault()
-        const element = document.getElementById(sectionId)
-        if (element) {
-          const headerHeight = 100
-          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-          const offsetPosition = elementPosition - headerHeight
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          })
-        }
-        return
-      }
-      
-      // If navigating to a different route, use navigation with scroll
       if (sectionId) {
-        e.preventDefault()
         sessionStorage.setItem('targetSection', sectionId)
-        sessionStorage.removeItem('preserveScroll')
-        router.push(ctaLink, { scroll: false })
       }
     }
   }

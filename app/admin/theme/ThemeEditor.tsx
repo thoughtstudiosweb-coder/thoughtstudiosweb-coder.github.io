@@ -214,9 +214,9 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Theme Editor</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Theme Editor</h1>
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={async () => {
               // Force refresh with cache-busting
@@ -238,14 +238,14 @@ export default function ThemeEditor({ initialData }: ThemeEditorProps) {
               }
               router.refresh()
             }}
-            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 text-sm sm:text-base flex-1 sm:flex-initial"
             title="Refresh data from server"
           >
             🔄 Refresh
           </button>
           <button
             onClick={() => setShowExamples(!showExamples)}
-            className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-sm"
+            className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-sm sm:text-base flex-1 sm:flex-initial"
           >
             {showExamples ? 'Hide' : 'Show'} Examples
           </button>

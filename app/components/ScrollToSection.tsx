@@ -84,25 +84,28 @@ export default function ScrollToSection({ sectionId }: ScrollToSectionProps) {
       }
 
       // Wait for page to render, then scroll smoothly
-      // Optimized: Use single RAF and faster retry for better performance
-      let rafId: number
+      // Use requestAnimationFrame for immediate execution after render
+      let rafId1: number
+      let rafId2: number
       let timeoutId: NodeJS.Timeout
       
-      rafId = requestAnimationFrame(() => {
-        // Try immediately - DOM is usually ready after first RAF
-        if (!scrollToElement()) {
-          // Fast retry if element not found (reduced from 50ms to 10ms)
-          timeoutId = setTimeout(() => {
-            if (!scrollToElement()) {
-              // Final retry with slightly longer delay
-              setTimeout(scrollToElement, 20)
-            }
-          }, 10)
-        }
+      rafId1 = requestAnimationFrame(() => {
+        rafId2 = requestAnimationFrame(() => {
+          // Double RAF ensures DOM is ready
+          if (!scrollToElement()) {
+            // Retry if element not found yet
+            timeoutId = setTimeout(() => {
+              if (!scrollToElement()) {
+                setTimeout(scrollToElement, 50)
+              }
+            }, 50)
+          }
+        })
       })
 
       return () => {
-        if (rafId) cancelAnimationFrame(rafId)
+        cancelAnimationFrame(rafId1)
+        if (rafId2) cancelAnimationFrame(rafId2)
         if (timeoutId) clearTimeout(timeoutId)
         hasScrolled.current = false
         scrollPrevented.current = false

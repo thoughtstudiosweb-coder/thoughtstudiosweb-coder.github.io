@@ -52,9 +52,9 @@ export default function EditBlogPost({ slug, initialData }: EditBlogPostProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-8">Edit Blog Post</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">Edit Blog Post</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-6 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-4 sm:p-6 rounded-lg">
         {message && (
           <div className={`p-3 rounded ${message.includes('Error') || message.includes('Failed') ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
             {message}

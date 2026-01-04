@@ -8,10 +8,9 @@ interface Explore {
 
 interface ExploreProps {
   data: Explore[]
-  sectionTitle: string
 }
 
-export default function Explore({ data, sectionTitle }: ExploreProps) {
+export default function Explore({ data }: ExploreProps) {
   if (!data || data.length === 0) {
     console.warn('Explore: No data provided')
     return null
@@ -20,7 +19,7 @@ export default function Explore({ data, sectionTitle }: ExploreProps) {
   return (
     <section id="explore" className="content-section">
       <div className="container">
-        <h2 className="section-title">{sectionTitle}</h2>
+        <h2 className="section-title">What We Explore</h2>
         <div className="cards-grid">
           {data.map((item, index) => (
             <div key={index} className={`card service-card ${!item.icon ? 'no-icon' : ''}`}>

@@ -1,5 +1,4 @@
 import { getBlogPost } from '@/lib/db'
-import { getSiteContent } from '@/lib/site-content'
 import { marked } from 'marked'
 import { notFound } from 'next/navigation'
 import Header from '@/app/components/Header'
@@ -26,15 +25,12 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
   const htmlContent = marked.parse(post.content || '')
 
-  // Fetch logo and site content server-side (no API routes, no connection pooling delays)
-  const [logo, siteContent] = await Promise.all([
-    Promise.resolve(<LogoServer />),
-    getSiteContent(),
-  ])
+  // Fetch logo server-side (no API routes, no connection pooling delays)
+  const logo = <LogoServer />
 
   return (
     <>
-      <Header logo={logo} navigation={siteContent.navigation} />
+      <Header logo={logo} />
       <main className="main">
         <div className="blog-post-detail">
           <div className="blog-post-header">
@@ -56,11 +52,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
           />
         </div>
       </main>
-      <Footer 
-        tagline={siteContent.footer.tagline}
-        copyright={siteContent.footer.copyright}
-        navigation={siteContent.navigation}
-      />
+      <Footer />
     </>
   )
 }

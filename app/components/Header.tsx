@@ -6,15 +6,9 @@ import { usePathname, useRouter } from 'next/navigation'
 
 interface HeaderProps {
   logo: React.ReactNode
-  navigation: {
-    believe: string
-    explore: string
-    studioNotes: string
-    development: string
-  }
 }
 
-export default function Header({ logo, navigation }: HeaderProps) {
+export default function Header({ logo }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -59,15 +53,29 @@ export default function Header({ logo, navigation }: HeaderProps) {
     e.preventDefault()
     setMenuOpen(false)
 
-    // Always navigate to sub-routes for consistency
-    // This ensures URL changes, better for sharing/bookmarking, and consistent behavior
-    // Store the target section ID for ScrollToSection to handle scrolling
-    sessionStorage.setItem('targetSection', sectionId)
-    // Clear preserveScroll to ensure we scroll to the section, not preserve position
-    sessionStorage.removeItem('preserveScroll')
-    
-    // Navigate to the target page - ScrollToSection will handle scrolling to the section
-    router.push(href, { scroll: false })
+    // If we're on the homepage, scroll to section smoothly without navigation
+    if (pathname === '/') {
+      const element = document.getElementById(sectionId)
+      if (element) {
+        const headerHeight = 100 // Reduced offset for better centering
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    } else {
+      // If we're on a different page, navigate without scrolling to top
+      // Store the target section ID and current scroll position
+      const currentScroll = window.scrollY
+      sessionStorage.setItem('targetSection', sectionId)
+      sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      
+      // Navigate without scrolling to top using scroll: false
+      router.push(href)
+    }
   }
 
   return (
@@ -104,33 +112,29 @@ export default function Header({ logo, navigation }: HeaderProps) {
               href="/believe" 
               className={`nav-link ${activeSection === 'believe' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'believe', '/believe')}
-              prefetch={true}
             >
-              {navigation.believe}
+              What We Believe
             </Link>
             <Link 
               href="/explore" 
               className={`nav-link ${activeSection === 'explore' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'explore', '/explore')}
-              prefetch={true}
             >
-              {navigation.explore}
+              What We Explore
             </Link>
             <Link 
               href="/studio-notes" 
               className={`nav-link ${activeSection === 'studio-notes' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'studio-notes', '/studio-notes')}
-              prefetch={true}
             >
-              {navigation.studioNotes}
+              Studio Notes
             </Link>
             <Link 
               href="/development" 
               className={`nav-link ${activeSection === 'development' ? 'active' : ''}`} 
               onClick={(e) => handleNavClick(e, 'development', '/development')}
-              prefetch={true}
             >
-              {navigation.development}
+              In Development
             </Link>
           </nav>
         </div>

@@ -22,17 +22,15 @@ export default function AdminNav() {
     { href: '/admin/blog', label: 'Blog' },
     { href: '/admin/theme', label: 'Theme' },
     { href: '/admin/logo', label: 'Logo' },
-    { href: '/admin/favicon', label: 'Favicon' },
-    { href: '/admin/site-content', label: 'Site Content' },
   ]
 
   return (
     <nav className="bg-gray-800 border-b border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
+        <div className="flex justify-between items-center min-h-16 py-2 sm:py-0 sm:h-16">
+          <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-white font-bold text-xl">Thought Studios CMS</span>
+              <span className="text-white font-bold text-lg sm:text-xl">Thought Studios CMS</span>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navItems.map((item) => (
