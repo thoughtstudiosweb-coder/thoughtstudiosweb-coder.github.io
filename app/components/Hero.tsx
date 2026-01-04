@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { normalizeToHttps } from '@/lib/url-utils'
 
 interface HeroProps {
   data: {
@@ -66,6 +67,14 @@ export default function Hero({ data }: HeroProps) {
 
   return (
     <section id="home" className="hero">
+      {data.image && (
+        <div 
+          className="hero-background"
+          style={{
+            backgroundImage: `url(${normalizeToHttps(data.image)})`,
+          }}
+        />
+      )}
       <div className="container">
         <h1 className="hero-title">{data.title}</h1>
         <p className="hero-description">{data.subtitle}</p>
