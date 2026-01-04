@@ -13,3 +13,4 @@ export default async function FaviconPage() {
   return <FaviconEditor initialData={favicon} />
 }
 
+

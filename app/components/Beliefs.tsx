@@ -8,9 +8,10 @@ interface Belief {
 
 interface BeliefsProps {
   data: Belief[]
+  sectionTitle: string
 }
 
-export default function Beliefs({ data }: BeliefsProps) {
+export default function Beliefs({ data, sectionTitle }: BeliefsProps) {
   if (!data || data.length === 0) {
     console.warn('Beliefs: No data provided')
     return null
@@ -19,7 +20,7 @@ export default function Beliefs({ data }: BeliefsProps) {
   return (
     <section id="believe" className="content-section">
       <div className="container">
-        <h2 className="section-title">What We Believe</h2>
+        <h2 className="section-title">{sectionTitle}</h2>
         <div className="cards-grid">
           {data.map((belief, index) => (
             <div key={index} className={`card ${!belief.icon ? 'no-icon' : ''}`}>

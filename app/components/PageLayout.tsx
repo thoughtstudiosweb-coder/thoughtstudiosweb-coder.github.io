@@ -1,4 +1,5 @@
 import { getPageData } from '@/lib/page-data'
+import { getSiteContent } from '@/lib/site-content'
 import Header from './Header'
 import LogoServer from './LogoServer'
 import Hero from './Hero'
@@ -28,26 +29,39 @@ interface PageLayoutProps {
 export default async function PageLayout({ scrollToSectionId }: PageLayoutProps) {
   // Fetch all page data using centralized function
   // This ensures consistent data fetching across all routes
-  const { welcome, beliefs, explore, blogPosts } = await getPageData()
+  // Fetch page data and site content in parallel for performance
+  const [pageData, siteContent] = await Promise.all([
+    getPageData(),
+    getSiteContent(),
+  ])
+
+  const { welcome, beliefs, explore, blogPosts } = pageData
 
   // Fetch logo server-side (no API routes, no connection pooling delays)
   const logo = <LogoServer />
 
   return (
     <>
-      <Header logo={logo} />
+      <Header logo={logo} navigation={siteContent.navigation} />
       <ScrollAnimations />
       {scrollToSectionId && <ScrollToSection sectionId={scrollToSectionId} />}
       <main className="main">
         {/* Components handle null/empty data gracefully */}
         <Hero data={welcome} />
-        <Beliefs data={beliefs || []} />
-        <Explore data={explore || []} />
-        <StudioNotes posts={blogPosts || []} />
-        <Development />
+        <Beliefs data={beliefs || []} sectionTitle={siteContent.sections.believe.title} />
+        <Explore data={explore || []} sectionTitle={siteContent.sections.explore.title} />
+        <StudioNotes posts={blogPosts || []} sectionTitle={siteContent.sections.studioNotes.title} />
+        <Development 
+          sectionTitle={siteContent.sections.development.title}
+          intro={siteContent.sections.development.intro}
+          outro={siteContent.sections.development.outro}
+        />
       </main>
-      <Footer />
+      <Footer 
+        tagline={siteContent.footer.tagline}
+        copyright={siteContent.footer.copyright}
+        navigation={siteContent.navigation}
+      />
     </>
   )
 }
-

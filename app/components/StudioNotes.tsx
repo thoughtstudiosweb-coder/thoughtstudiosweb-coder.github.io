@@ -17,6 +17,7 @@ interface BlogPost {
 
 interface StudioNotesProps {
   posts: BlogPost[]
+  sectionTitle: string
 }
 
 const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect fill='%231a1a1a' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui, sans-serif' font-size='24' fill='%23666'%3EThought Studios%3C/text%3E%3C/svg%3E"
@@ -27,7 +28,7 @@ function formatDate(dateString: string) {
   return date.toLocaleDateString('en-US', options)
 }
 
-export default function StudioNotes({ posts }: StudioNotesProps) {
+export default function StudioNotes({ posts, sectionTitle }: StudioNotesProps) {
   const [displayedPosts, setDisplayedPosts] = useState<BlogPost[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 3 // Show 3 posts per page
@@ -79,7 +80,7 @@ export default function StudioNotes({ posts }: StudioNotesProps) {
   return (
     <section id="studio-notes" className="content-section studio-notes-section">
       <div className="container">
-        <h2 className="section-title">Studio Notes</h2>
+        <h2 className="section-title">{sectionTitle}</h2>
         <div className="studio-notes-grid" id="studioNotesGrid">
           {displayedPosts.map((post) => (
             <Link

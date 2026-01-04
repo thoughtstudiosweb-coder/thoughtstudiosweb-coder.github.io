@@ -6,9 +6,15 @@ import { usePathname, useRouter } from 'next/navigation'
 
 interface HeaderProps {
   logo: React.ReactNode
+  navigation: {
+    believe: string
+    explore: string
+    studioNotes: string
+    development: string
+  }
 }
 
-export default function Header({ logo }: HeaderProps) {
+export default function Header({ logo, navigation }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -100,7 +106,7 @@ export default function Header({ logo }: HeaderProps) {
               onClick={(e) => handleNavClick(e, 'believe', '/believe')}
               prefetch={true}
             >
-              What We Believe
+              {navigation.believe}
             </Link>
             <Link 
               href="/explore" 
@@ -108,7 +114,7 @@ export default function Header({ logo }: HeaderProps) {
               onClick={(e) => handleNavClick(e, 'explore', '/explore')}
               prefetch={true}
             >
-              What We Explore
+              {navigation.explore}
             </Link>
             <Link 
               href="/studio-notes" 
@@ -116,7 +122,7 @@ export default function Header({ logo }: HeaderProps) {
               onClick={(e) => handleNavClick(e, 'studio-notes', '/studio-notes')}
               prefetch={true}
             >
-              Studio Notes
+              {navigation.studioNotes}
             </Link>
             <Link 
               href="/development" 
@@ -124,7 +130,7 @@ export default function Header({ logo }: HeaderProps) {
               onClick={(e) => handleNavClick(e, 'development', '/development')}
               prefetch={true}
             >
-              In Development
+              {navigation.development}
             </Link>
           </nav>
         </div>
