@@ -8,9 +8,11 @@ export default function AdminLayout({
   // Middleware handles all auth protection
   // This layout only renders the admin UI structure
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-900 flex">
       <AdminNav />
-      <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
     </div>
   )
 }
