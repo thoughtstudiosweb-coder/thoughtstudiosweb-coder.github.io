@@ -19,8 +19,33 @@ export default function FooterNav({ navigation }: FooterNavProps) {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string, href: string) => {
     e.preventDefault()
 
+    // Map routes to section IDs
+    const routeToSection: Record<string, string> = {
+      '/believe': 'believe',
+      '/explore': 'explore',
+      '/studio-notes': 'studio-notes',
+      '/development': 'development',
+    }
+
+    // Check if we're already on the target route
+    const currentSection = routeToSection[pathname || '']
+    const isSameSection = currentSection === sectionId
+
     // If we're on the homepage, scroll to section smoothly without navigation
     if (pathname === '/') {
+      const element = document.getElementById(sectionId)
+      if (element) {
+        const headerHeight = 100
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    } else if (isSameSection) {
+      // If clicking the same section we're already on, just scroll to it
       const element = document.getElementById(sectionId)
       if (element) {
         const headerHeight = 100

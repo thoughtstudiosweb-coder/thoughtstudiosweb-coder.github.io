@@ -59,11 +59,36 @@ export default function Header({ logo, navigation }: HeaderProps) {
     e.preventDefault()
     setMenuOpen(false)
 
+    // Map routes to section IDs
+    const routeToSection: Record<string, string> = {
+      '/believe': 'believe',
+      '/explore': 'explore',
+      '/studio-notes': 'studio-notes',
+      '/development': 'development',
+    }
+
+    // Check if we're already on the target route
+    const currentSection = routeToSection[pathname || '']
+    const isSameSection = currentSection === sectionId
+
     // If we're on the homepage, scroll to section smoothly without navigation
     if (pathname === '/') {
       const element = document.getElementById(sectionId)
       if (element) {
-        const headerHeight = 100 // Reduced offset for better centering
+        const headerHeight = 100
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    } else if (isSameSection) {
+      // If clicking the same section we're already on, just scroll to it
+      const element = document.getElementById(sectionId)
+      if (element) {
+        const headerHeight = 100
         const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
         const offsetPosition = elementPosition - headerHeight
 
