@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { readJSON } from './content'
 
 export interface SiteContent {
+  pageTitle: string
   navigation: {
     believe: string
     explore: string
@@ -32,6 +33,7 @@ export interface SiteContent {
 
 // Default values - used as fallback if CMS data is missing
 const DEFAULT_SITE_CONTENT: SiteContent = {
+  pageTitle: 'Thought Studios™',
   navigation: {
     believe: 'What We Believe',
     explore: 'What We Explore',
@@ -76,6 +78,7 @@ export const getSiteContent = cache(async (): Promise<SiteContent> => {
   
   // Merge with defaults to ensure all fields are present
   return {
+    pageTitle: content.pageTitle || DEFAULT_SITE_CONTENT.pageTitle,
     navigation: {
       ...DEFAULT_SITE_CONTENT.navigation,
       ...content.navigation,

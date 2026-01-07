@@ -70,6 +70,29 @@ export default function SiteContentEditor({ initialData }: SiteContentEditorProp
           </div>
         )}
 
+        {/* Page Title */}
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Page Title</h2>
+          <p className="text-xs sm:text-sm text-gray-400 mb-4">This appears in the browser tab and search engine results.</p>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Page Title
+            </label>
+            <input
+              type="text"
+              value={content.pageTitle}
+              onChange={(e) => setContent({
+                ...content,
+                pageTitle: e.target.value
+              })}
+              className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+              placeholder="Thought Studios™"
+              required
+            />
+          </div>
+        </div>
+
         {/* Navigation Labels */}
         <div className="bg-gray-800 p-4 sm:p-6 rounded-lg">
           <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Navigation Labels</h2>

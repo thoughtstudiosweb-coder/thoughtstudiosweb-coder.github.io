@@ -15,6 +15,8 @@ export async function saveSiteContent(data: SiteContent) {
   
   if (success) {
     // Revalidate all pages that use site content
+    // Also revalidate layout to update page title in metadata
+    revalidatePath('/', 'layout')
     revalidatePath('/admin/site-content')
     revalidatePath('/')
     revalidatePath('/explore')
