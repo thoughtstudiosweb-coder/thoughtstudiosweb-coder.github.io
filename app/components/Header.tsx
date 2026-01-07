@@ -77,9 +77,11 @@ export default function Header({ logo, navigation }: HeaderProps) {
       // Store the target section ID and current scroll position
       const currentScroll = window.scrollY
       sessionStorage.setItem('targetSection', sectionId)
-      sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      if (currentScroll > 0) {
+        sessionStorage.setItem('preserveScroll', currentScroll.toString())
+      }
       
-      // Navigate without scrolling to top using scroll: false
+      // Navigate without scrolling to top using router.push
       router.push(href)
     }
   }
