@@ -47,6 +47,22 @@ export default function AdminDashboard() {
         </Link>
 
         <Link
+          href="/admin/logo"
+          className="block p-4 sm:p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">Logo</h2>
+          <p className="text-sm sm:text-base text-gray-400">Configure text or image logo</p>
+        </Link>
+
+        <Link
+          href="/admin/favicon"
+          className="block p-4 sm:p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">Favicon</h2>
+          <p className="text-sm sm:text-base text-gray-400">Set website favicon icon</p>
+        </Link>
+
+        <Link
           href="/admin/site-content"
           className="block p-4 sm:p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
         >

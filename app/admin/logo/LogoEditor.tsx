@@ -25,7 +25,11 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
 
   // Sync with server props when they change
   useEffect(() => {
-    setConfig(initialData || DEFAULT_LOGO)
+    if (initialData) {
+      setConfig(initialData)
+    } else {
+      setConfig(DEFAULT_LOGO)
+    }
   }, [initialData])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,62 +40,18 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
     try {
       await saveLogo(config)
       setSaveSuccess(true)
-      setMessage('Saved successfully! Refreshing...')
+      setMessage('Saved successfully!')
       
       // Wait for database write to propagate (connection pooling delay)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Fetch fresh data and dispatch events
-      setTimeout(async () => {
-        try {
-          const response = await fetch(`/api/content/logo?t=${Date.now()}&r=${Math.random()}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0',
-            },
-          })
-          if (response.ok) {
-            const updated = await response.json()
-            if (updated) {
-              console.log('✅ LogoEditor: Fetched updated logo', updated)
-              setConfig(updated)
-              
-              // Dispatch custom event to notify Logo components to refresh
-              // This works if CMS and site are in the same window/tab
-              console.log('📢 LogoEditor: Dispatching logo-updated event')
-              window.dispatchEvent(new Event('logo-updated'))
-              
-              // Also trigger refresh in other tabs/windows using BroadcastChannel
-              try {
-                const channel = new BroadcastChannel('logo-updates')
-                channel.postMessage({ 
-                  type: 'logo-updated', 
-                  timestamp: Date.now(),
-                  config: updated // Include config in message
-                })
-                // Keep channel open briefly to ensure message is sent
-                setTimeout(() => channel.close(), 100)
-              } catch (e) {
-                console.warn('⚠️ LogoEditor: BroadcastChannel not supported')
-              }
-              
-              // Force a second refresh after a bit more delay to ensure all instances update
-              setTimeout(() => {
-                window.dispatchEvent(new Event('logo-updated'))
-              }, 1000)
-            }
-          }
-        } catch (error) {
-          console.error('❌ LogoEditor: Error fetching updated logo:', error)
-        }
-        setMessage('Saved successfully!')
-        setTimeout(() => {
-          setMessage('')
-          setSaveSuccess(false)
-        }, 2000)
-      }, 1500)
+      // Refresh to trigger server-side re-render
+      router.refresh()
+      
+      setTimeout(() => {
+        setMessage('')
+        setSaveSuccess(false)
+      }, 2000)
     } catch (error: any) {
       setMessage(error.message || 'Error saving')
       setSaveSuccess(false)
@@ -130,7 +90,13 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
                 type="radio"
                 value="text"
                 checked={config.type === 'text'}
-                onChange={(e) => setConfig({ ...config, type: 'text', imageUrl: undefined, width: undefined, height: undefined })}
+                onChange={(e) => {
+                  const { imageUrl, width, height, ...rest } = config
+                  setConfig({ 
+                    ...rest, 
+                    type: 'text' as const
+                  })
+                }}
                 className="mr-2"
               />
               <span className="text-white">Text</span>
@@ -140,7 +106,13 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
                 type="radio"
                 value="image"
                 checked={config.type === 'image'}
-                onChange={(e) => setConfig({ ...config, type: 'image', text: undefined, fontSize: undefined })}
+                onChange={(e) => {
+                  const { text, fontSize, ...rest } = config
+                  setConfig({ 
+                    ...rest, 
+                    type: 'image' as const
+                  })
+                }}
                 className="mr-2"
               />
               <span className="text-white">Image</span>
@@ -246,6 +218,9 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
                     height: `${config.height || 50}px`,
                     objectFit: 'contain',
                   }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none'
+                  }}
                 />
               )
             )}
@@ -257,4 +232,3 @@ export default function LogoEditor({ initialData }: LogoEditorProps) {
     </div>
   )
 }
-

@@ -25,6 +25,7 @@ export default function AdminNav() {
     { href: '/admin/site-content', label: 'Site Content' },
     { href: '/admin/theme', label: 'Theme' },
     { href: '/admin/logo', label: 'Logo' },
+    { href: '/admin/favicon', label: 'Favicon' },
   ]
 
   return (
