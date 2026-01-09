@@ -60,6 +60,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
         tagline={siteContent.footer.tagline}
         copyright={siteContent.footer.copyright}
         navigation={siteContent.navigation}
+        social={siteContent.footer.social}
       />
     </>
   )

@@ -1524,6 +1524,36 @@ html.theme-transitioning * {
     transform: translateX(4px);
 }
 
+.footer-social {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.footer-social-link {
+    color: var(--text-gray);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.footer-social-link:hover {
+    color: var(--accent-rose-gold);
+    border-color: var(--accent-rose-gold);
+    transform: translateY(-2px);
+    background-color: rgba(193, 154, 107, 0.1);
+}
+
+.footer-social-link svg {
+    width: 20px;
+    height: 20px;
+}
+
 .footer-copyright {
     text-align: right;
     color: var(--text-gray);
@@ -1629,6 +1659,20 @@ html.theme-transitioning * {
     .footer-nav {
         flex-direction: column;
         gap: 20px;
+    }
+    
+    .footer-social {
+        gap: 12px;
+    }
+    
+    .footer-social-link {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .footer-social-link svg {
+        width: 18px;
+        height: 18px;
     }
     
     .footer-copyright {

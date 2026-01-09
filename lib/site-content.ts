@@ -28,6 +28,11 @@ export interface SiteContent {
   footer: {
     tagline: string
     copyright: string
+    social: {
+      instagram: string
+      linkedin: string
+      email: string
+    }
   }
 }
 
@@ -59,6 +64,11 @@ const DEFAULT_SITE_CONTENT: SiteContent = {
   footer: {
     tagline: 'A place to think clearly',
     copyright: '© 2025 RB & A Consulting LLC. Thought Studios™ is a brand of RB & A Consulting LLC. All rights reserved.',
+    social: {
+      instagram: '',
+      linkedin: '',
+      email: '',
+    },
   },
 }
 
@@ -90,6 +100,10 @@ export const getSiteContent = cache(async (): Promise<SiteContent> => {
     footer: {
       ...DEFAULT_SITE_CONTENT.footer,
       ...content.footer,
+      social: {
+        ...DEFAULT_SITE_CONTENT.footer.social,
+        ...(content.footer?.social || {}),
+      },
     },
   }
 })

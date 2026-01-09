@@ -298,7 +298,7 @@ export default function SiteContentEditor({ initialData }: SiteContentEditorProp
         {/* Footer Content */}
         <div className="bg-gray-800 p-4 sm:p-6 rounded-lg">
           <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Footer Content</h2>
-          <p className="text-xs sm:text-sm text-gray-400 mb-4">Footer tagline and copyright text.</p>
+          <p className="text-xs sm:text-sm text-gray-400 mb-4">Footer tagline, copyright text, and social media links.</p>
           
           <div className="space-y-4">
             <div>
@@ -331,6 +331,70 @@ export default function SiteContentEditor({ initialData }: SiteContentEditorProp
                 rows={2}
                 required
               />
+            </div>
+
+            <div className="pt-4 border-t border-gray-700">
+              <h3 className="text-base font-semibold text-white mb-3">Social Media Links</h3>
+              <p className="text-xs text-gray-400 mb-4">Add your social media URLs. Leave empty to hide.</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Instagram URL
+                  </label>
+                  <input
+                    type="url"
+                    value={content.footer.social.instagram}
+                    onChange={(e) => setContent({
+                      ...content,
+                      footer: {
+                        ...content.footer,
+                        social: { ...content.footer.social, instagram: e.target.value }
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="https://instagram.com/yourprofile"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    LinkedIn URL
+                  </label>
+                  <input
+                    type="url"
+                    value={content.footer.social.linkedin}
+                    onChange={(e) => setContent({
+                      ...content,
+                      footer: {
+                        ...content.footer,
+                        social: { ...content.footer.social, linkedin: e.target.value }
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="https://linkedin.com/in/yourprofile"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={content.footer.social.email}
+                    onChange={(e) => setContent({
+                      ...content,
+                      footer: {
+                        ...content.footer,
+                        social: { ...content.footer.social, email: e.target.value }
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

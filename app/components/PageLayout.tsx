@@ -61,6 +61,7 @@ export default async function PageLayout({ scrollToSectionId }: PageLayoutProps)
         tagline={siteContent.footer.tagline}
         copyright={siteContent.footer.copyright}
         navigation={siteContent.navigation}
+        social={siteContent.footer.social}
       />
     </>
   )
