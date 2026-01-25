@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { deletePost } from './actions'
+import { renderMarkdownInlineToHtml } from '@/lib/markdown'
 
 interface BlogPost {
   slug: string
@@ -70,7 +71,16 @@ export default function BlogManager({ initialPosts }: BlogManagerProps) {
             <div className="flex-1 min-w-0">
               <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 break-words">{post.title}</h3>
               <p className="text-gray-400 text-sm mb-2">{post.date}</p>
-              <p className="text-gray-300 text-sm sm:text-base break-words">{post.excerpt.substring(0, 150)}...</p>
+              <div
+                className="text-gray-300 text-sm sm:text-base break-words markdown markdown--compact"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical' as any,
+                  overflow: 'hidden',
+                }}
+                dangerouslySetInnerHTML={{ __html: renderMarkdownInlineToHtml(post.excerpt || '') }}
+              />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
               <Link

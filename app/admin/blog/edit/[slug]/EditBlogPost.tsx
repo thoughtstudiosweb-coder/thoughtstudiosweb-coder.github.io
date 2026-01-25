@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updatePost } from '../../actions'
 import ImageUpload from '../../../components/ImageUpload'
+import { renderMarkdownToHtml } from '@/lib/markdown'
 
 interface EditBlogPostProps {
   slug: string
@@ -25,6 +26,8 @@ export default function EditBlogPost({ slug, initialData }: EditBlogPostProps) {
   const [content, setContent] = useState(initialData.content || '')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+
+  const previewHtml = useMemo(() => renderMarkdownToHtml(content || ''), [content])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,13 +115,28 @@ export default function EditBlogPost({ slug, initialData }: EditBlogPostProps) {
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Content (Markdown)
           </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white font-mono"
-            rows={20}
-            required
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white font-mono"
+                rows={20}
+                required
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="block text-sm font-medium text-gray-300">Preview</span>
+                <span className="text-xs text-gray-400">Renders markdown (italics, links, lists, etc.)</span>
+              </div>
+              <div
+                className="w-full px-4 py-3 border border-gray-600 rounded-md bg-gray-900 text-white overflow-auto markdown"
+                style={{ minHeight: 420 }}
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex space-x-4">

@@ -1044,8 +1044,10 @@ html.theme-transitioning * {
 .studio-note-card {
     display: flex;
     flex-direction: column;
-    background-color: transparent;
-    border: none;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
     padding: 0;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
@@ -1101,8 +1103,8 @@ html.theme-transitioning * {
     width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    border-radius: 0;
+    margin-bottom: 0;
     background-color: var(--bg-card);
 }
 
@@ -1115,6 +1117,14 @@ html.theme-transitioning * {
 
 .studio-note-card:hover .studio-note-image {
     transform: scale(1.1) rotate(1deg);
+}
+
+.studio-note-content {
+    display: flex;
+    flex-direction: column;
+    padding: 18px 18px 16px;
+    gap: 0;
+    flex: 1 1 auto;
 }
 
 .studio-note-date {
@@ -1146,6 +1156,7 @@ html.theme-transitioning * {
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    flex: 1 1 auto;
 }
 
 .studio-note-read-more {
@@ -1155,6 +1166,7 @@ html.theme-transitioning * {
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-block;
+    margin-top: auto;
 }
 
 .studio-note-read-more:hover {
@@ -1448,6 +1460,106 @@ html.theme-transitioning * {
 }
 
 .blog-post-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Markdown rendering (blog + CMS preview + excerpts) */
+.markdown em {
+    font-style: italic;
+}
+
+.markdown strong {
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+.markdown a {
+    color: var(--accent-rose-gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.markdown a:hover {
+    opacity: 0.9;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+    color: var(--text-white);
+    line-height: 1.25;
+    margin: 28px 0 14px;
+}
+
+.markdown h1 { font-size: 34px; }
+.markdown h2 { font-size: 28px; }
+.markdown h3 { font-size: 22px; }
+.markdown h4 { font-size: 18px; }
+
+.markdown ul,
+.markdown ol {
+    padding-left: 22px;
+    margin: 18px 0 22px;
+}
+
+.markdown li {
+    margin: 8px 0;
+}
+
+.markdown blockquote {
+    margin: 22px 0;
+    padding: 12px 16px;
+    border-left: 3px solid rgba(193, 154, 107, 0.6);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-gray);
+    font-style: italic;
+    border-radius: 10px;
+}
+
+.markdown code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95em;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.15em 0.35em;
+    border-radius: 8px;
+}
+
+.markdown pre {
+    margin: 22px 0;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: auto;
+}
+
+.markdown pre code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-size: 0.95em;
+}
+
+.markdown hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 28px 0;
+}
+
+.markdown img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 14px;
+}
+
+/* Compact markdown for card excerpts */
+.markdown--compact p {
+    margin-bottom: 10px;
+}
+
+.markdown--compact p:last-child {
     margin-bottom: 0;
 }
 
@@ -2117,8 +2229,12 @@ html.theme-transitioning * {
     }
     
     .studio-note-image-container {
-        margin-bottom: 16px;
-        border-radius: 6px;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+
+    .studio-note-content {
+        padding: 16px 16px 14px;
     }
     
     .studio-note-date {

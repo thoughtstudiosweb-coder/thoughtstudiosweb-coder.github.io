@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { normalizeToHttps } from '@/lib/url-utils'
+import { renderMarkdownInlineToHtml } from '@/lib/markdown'
 
 interface BlogPost {
   slug: string
@@ -99,10 +100,15 @@ export default function StudioNotes({ posts, sectionTitle }: StudioNotesProps) {
                   }}
                 />
               </div>
-              <div className="studio-note-date">{formatDate(post.date)}</div>
-              <h3 className="studio-note-title">{post.title}</h3>
-              <p className="studio-note-excerpt">{post.excerpt}</p>
-              <span className="studio-note-read-more">Read More</span>
+              <div className="studio-note-content">
+                <div className="studio-note-date">{formatDate(post.date)}</div>
+                <h3 className="studio-note-title">{post.title}</h3>
+                <div
+                  className="studio-note-excerpt markdown markdown--compact"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdownInlineToHtml(post.excerpt || '') }}
+                />
+                <span className="studio-note-read-more">Read More</span>
+              </div>
             </Link>
           ))}
         </div>

@@ -1,6 +1,6 @@
 import { getBlogPost } from '@/lib/db'
 import { getSiteContent } from '@/lib/site-content'
-import { marked } from 'marked'
+import { renderMarkdownToHtml } from '@/lib/markdown'
 import { notFound } from 'next/navigation'
 import Header from '@/app/components/Header'
 import LogoServer from '@/app/components/LogoServer'
@@ -24,7 +24,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
     notFound()
   }
 
-  const htmlContent = marked.parse(post.content || '')
+  const htmlContent = renderMarkdownToHtml(post.content || '')
 
   // Fetch logo and site content server-side (no API routes, no connection pooling delays)
   const [logo, siteContent] = await Promise.all([
@@ -51,7 +51,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
             </div>
           </div>
           <div
-            className="blog-post-body"
+            className="blog-post-body markdown"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         </div>
